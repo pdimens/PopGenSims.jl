@@ -1,5 +1,14 @@
 module GeneticCrosses
 
-# Write your package code here.
+using DataFrames
+using PopGen:
+    PopData,
+    Genotype,
+    GenoArray,
+    get_genotypes,
+    read_from,
+    write_to,
+    nancycats
+
 
 end
