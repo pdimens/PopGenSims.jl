@@ -26,7 +26,10 @@ julia> data = read_from("path/to/filename.ext", kwargs...);
 julia> f1 = cross(data, "sample1", "sample2", n = 100000) ;
 
 # perform a backcross
-julia> f2_backcross = backcross(data, f1, parent1 = "sample1", parent2 = "offspring_99", n = 100000) ;
+julia> f2_backcross = cross(data, f1, parent1 = "sample1", parent2 = "offspring_99", n = 100000, generation = "F2") ;
+
+# merge PopData objects
+crossed_sims = append(data, f1)
 ```
 
 Currently, `GeneticCrosses.jl` can create crosses for:
