@@ -1,4 +1,4 @@
-[logo](/GeneticCrosses.png)
+[logo](https://raw.githubusercontent.com/pdimens/GeneticCrosses.jl/master/GeneticCrosses.png)
 
 ## Simulate breeding crosses between individuals
 
