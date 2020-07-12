@@ -1,4 +1,4 @@
-[logo](GeneticCrosses.png)
+[logo](/GeneticCrosses.png)
 
 ## Simulate breeding crosses between individuals
 
