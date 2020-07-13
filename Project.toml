@@ -10,6 +10,7 @@ PopGen = "af524d12-c74b-11e9-22a8-3b091653023f"
 
 [compat]
 DataFrames = "0.21"
+InvertedIndices = "1.0"
 julia = "1.4"
 
 [extras]
