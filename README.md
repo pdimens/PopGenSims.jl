@@ -41,4 +41,4 @@ Currently, `GeneticCrosses.jl` can create crosses for:
 
 To learn more about reading in data, see the docstring `?read_from` or read the [PopGen.jl docs section](https://pdimens.github.io/PopGen.jl/docs/io/file_import) on it.
 
-To learn more about crossing and backcrossing, see their docstrings `?cross` and `?backcross` respectively.
+To learn more about crossing see their docstrings with `?cross`
