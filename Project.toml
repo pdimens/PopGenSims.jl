@@ -6,6 +6,7 @@ version = "0.0.1"
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 InvertedIndices = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+PooledArrays = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
 PopGen = "af524d12-c74b-11e9-22a8-3b091653023f"
 
 [compat]

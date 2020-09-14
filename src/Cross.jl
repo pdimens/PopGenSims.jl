@@ -55,8 +55,8 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
 
     # Get the ploidy value & check for equal ploidy
-    p1_ploidy = length.(skipmissing(p1))[1]
-    p2_ploidy = length.(skipmissing(p2))[1]
+    p1_ploidy = length.(skipmissing(p1)) |> first
+    p2_ploidy = length.(skipmissing(p2)) |> first
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
 
     loci = unique(data.loci.locus)
@@ -69,7 +69,10 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     out_population = fill(generation, n * length(loci))
     out_geno = similar(p1, n * length(loci))
     out_loci = DataFrame(:name => out_offspring, :population => out_population, :locus => out_loci_names, :genotype => out_geno)
-    categorical!(out_loci, [:name, :population, :locus], compress = true)
+    #categorical!(out_loci, [:name, :population, :locus], compress = true)
+    out_loci.name = PooledArray(out_loci.name)
+    out_loci.population = PooledArray(out_loci.population)
+    out_loci.locus = PooledArray(out_loci.locus)
     
     # perform the cross
     if p1_ploidy == 1 
@@ -92,18 +95,24 @@ end
 
 
 """
-    cross(parent_1_data::PopData, parent_2_data::PopData; parent1::String, parent2::String, n::Int = 100, generation::String = "F1")
+    cross(parent_1::Pair, parent_2::Pair, n::Int = 100, generation::String = "F1")
 
 Simulate a breeding cross between individuals `parent` and `parent2` from two different `PopData` objects.
 Returns PopData consisting of `n` offspring resulting from the cross. `parent_1_data` and `parent_2_data` 
 are positional arguments, therefore they must be written without keywords and in the order of parents 1, parent 2. 
 #### Keyword Arguments
-- `parent1` : String of the first parent's name
-- `parent2` : String of the second parent's name
+- `parent_1` : Pair of `PopData => "Parent1Name"`
+- `parent_2` : Pair of `PopData => "Parent1Name"`
 - `n` : Integer of number of offspring to generate (default: `100`)
 - `generation` : A string to assign `population` identity to the offspring (default: `"F1"`)
 """
-function cross(parent_1_data::PopData, parent_2_data::PopData; parent1::String, parent2::String, n::Int = 100, generation::String = "F1")
+function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String = "F1")
+    parent_1_data = parent_1.first
+    parent_2_data = parent_2.first
+
+    parent1 = parent_1.second
+    parent2 = parent_2.second
+
     # check for presence of parents
     parent1 ∉ (@view parent_1_data.meta[!, :name]) && error("$parent not found in PopData")
     parent2 ∉ (@view parent_2_data.meta[!, :name]) && error("$parent2 not found in PopData")
@@ -117,8 +126,8 @@ function cross(parent_1_data::PopData, parent_2_data::PopData; parent1::String, 
     length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
 
     # Get the ploidy value & check for equal ploidy
-    p1_ploidy = length.(skipmissing(p1))[1]
-    p2_ploidy = length.(skipmissing(p2))[1]
+    p1_ploidy = length.(skipmissing(p1)) |> first
+    p2_ploidy = length.(skipmissing(p2)) |> first
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
 
     # verify identical loci
@@ -139,8 +148,11 @@ function cross(parent_1_data::PopData, parent_2_data::PopData; parent1::String, 
     out_population = fill(generation, n * length(loci))
     out_geno = similar(p1, n * length(loci))
     out_loci = DataFrame(:name => out_offspring, :population => out_population, :locus => out_loci_names, :genotype => out_geno)
-    categorical!(out_loci, [:name, :population, :locus], compress = true)
-    
+    #categorical!(out_loci, [:name, :population, :locus], compress = true)
+    out_loci.name = PooledArray(out_loci.name)
+    out_loci.population = PooledArray(out_loci.population)
+    out_loci.locus = PooledArray(out_loci.locus)
+
     # perform the cross
     if p1_ploidy == 1 
         haploid_cross!(data, parent, parent2, n = n)
@@ -155,7 +167,7 @@ function cross(parent_1_data::PopData, parent_2_data::PopData; parent1::String, 
         :population => fill(generation, n),
         :latitude => Vector{Union{Missing, Float32}}(undef, n),
         :longitude => Vector{Union{Missing, Float32}}(undef, n),
-        :parents => fill((parent,parent2), n)
+        :parents => fill((parent1,parent2), n)
     )
     PopData(out_meta, out_loci)
 end
