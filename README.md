@@ -27,11 +27,10 @@ julia> cats = nancycats()
 julia> data = read_from("path/to/filename.ext", kwargs...);
 ```
 
-
 #### Perform a cross
 The `cross` function for a simple parental cross from individuals in the same `PopData` object follows the syntax
 ```
-cross(::PopData, parent1::String, parent2::Strig; n::Int)
+cross(::PopData, parent1::String, parent2::String; n::Int)
 ```
 where `parent1` and `parent2` are strings of the names of the parents in the PopData, and the keyword `n` specifies the number of offspring you would like to simulate.
 
@@ -49,7 +48,7 @@ where again `n` is a keyword argument for the number of offspring to produce, an
 
 ##### example
 ``` 
-julia> f2_backcross = cross(data => "sample1, f1 => "offspring_99", n = 100000, generation = "F2") ;
+julia> f2_backcross = cross(data => "sample1", f1 => "offspring_99", n = 100000, generation = "F2") ;
 
 # merge PopData objects
 crossed_sims = append(data, f1)
