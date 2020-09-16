@@ -1,6 +1,7 @@
 module GeneticCrosses
 
 using DataFrames, PooledArrays, StaticArrays
+using StatsBase: sample
 using PopGen:
     PopData,
     Genotype,

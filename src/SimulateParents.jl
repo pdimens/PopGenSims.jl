@@ -11,8 +11,6 @@ end
 function allele_pool(data::PopData)
     # index dataframe by locus
     idx_df = groupby(data.loci, [:locus])
-    # get the data type
-    markertype = skipmissing(idx_df[1].genotype) |> first |> eltype
     # instantiate dict to store alleles
     allele_dict = Dict{String,NTuple}()
     # pull out loci names
@@ -26,9 +24,51 @@ function simulate_parent(alleles::Dict{String,NTuple}, loc::Vector{String}; ploi
 end
 
 function cross(parent1::Vector{Vector{T}}, parent2::Vector{Vector{T}}) where T <: Signed
-    p1_contrib = rand.(parent1)
-    p2_contrib = rand.(parent2)
-    sort.(zip(p1_contrib, p2_contrib))
+    ploidy = length(first(parent1))
+    ploidy == 1 && error("Haploid crosses are not yet supported. Please file and issue or pull request")
+    if ploidy == 2
+        p1_contrib = rand.(parent1)
+        p2_contrib = rand.(parent2)
+        geno_out = sort.(zip(p1_contrib, p2_contrib))
+    elseif iseven(ploidy)
+        n_allele = ploidy ÷ 2
+        p1_contrib = sample.(parent1, n_allele, replace = false)
+        p2_contrib = sample.(parent2, n_allele, replace = false)
+        geno_out = Tuple.(sort!.(append!.(p1_contrib, p2_contrib)))
+    else
+        # special method to provide a 50% chance of one parent giving more alleles than the other
+        rng = rand()
+        contrib_1 = ploidy ÷ 2
+        contrib_2 = ploidy - contrib_1
+        p1_contrib = rng > 0.5 ? sample.(parent1, contrib_1, replace = false) : sample.(parent1, contrib_2, replace = false)
+        p2_contrib = rng > 0.5 ? sample.(parent2, contrib_2, replace = false) : sample.(parent2, contrib_1, replace = false)
+        geno_out = Tuple.(sort!.(append!.(p1_contrib, p2_contrib)))
+    end
+    return geno_out
+end
+
+function fullsib(data::PopData; n::Int = 100, ploidy::Int = 2)
+    loc, alleles = allele_pool(data)
+    out_df = DataFrame(:locus => loc)
+    for i in 1:n
+        offspring_prefix = "sim$i"
+        p1,p2 = [simulate_parent(alleles, loc, ploidy = ploidy) for j in 1:2]
+        sibs = [insertcols!(out_df, Symbol(offspring_prefix * "_off$j") => cross(p1, p2)) for j in 1:2]
+    end
+    out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
+    insertcols!(out_df, 2, :population => "fullsib_sim")
+    out_df.name = PooledArray(out_df.name)
+    out_df.population = PooledArray(out_df.population)
+    out_df.locus = PooledArray(out_df.locus)
+    
+    meta_df = DataFrame(
+        :name => unique(out_df.name), 
+        :population => "fullsib_sim", 
+        :ploidy => ploidy, 
+        :longitude => Vector{Union{Missing, Float32}}(undef, n*2),
+        :latitude => Vector{Union{Missing, Float32}}(undef, n*2),
+        )
+    return PopData(meta_df, out_df)
 end
 
 #= wont need

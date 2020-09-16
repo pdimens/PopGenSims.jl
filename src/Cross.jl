@@ -1,7 +1,7 @@
 export cross, backcross
 
 function sample_genotype(geno::T, n_alleles::Int) where T<:Genotype
-    rand(geno, n_alleles)
+    sample(geno, n_alleles, replace = false)
 end
 
 function sample_genotype(geno::Missing, n_alleles::Int)
