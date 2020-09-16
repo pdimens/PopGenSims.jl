@@ -1,6 +1,6 @@
 module GeneticCrosses
 
-using DataFrames, PooledArrays
+using DataFrames, PooledArrays, StaticArrays
 using PopGen:
     PopData,
     Genotype,
@@ -8,7 +8,8 @@ using PopGen:
     get_genotypes,
     read_from,
     write_to,
-    nancycats
+    nancycats, 
+    sort
 
 include("Cross.jl")
 
