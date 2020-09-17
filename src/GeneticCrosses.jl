@@ -1,4 +1,4 @@
-module GeneticCrosses
+module PopGenSims
 
 using DataFrames, PooledArrays, StaticArrays
 using StatsBase: sample
@@ -13,6 +13,7 @@ using PopGen:
     sort
 
 include("Cross.jl")
-
+# not yet ready
+#include("SimulateParents.jl")
 end
 
