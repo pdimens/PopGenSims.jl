@@ -54,7 +54,7 @@ julia> f2_backcross = cross(data => "sample1", f1 => "offspring_99", n = 100000,
 crossed_sims = append(data, f1)
 ```
 
-Currently, `GeneticCrosses.jl` can create crosses for:
+Currently, `PopGenSims` can create crosses for:
 - haploids (ploidy = 1)
 - diploids (ploidy = 2)
 - tetraploids (ploidy = 4) 
