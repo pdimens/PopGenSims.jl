@@ -43,15 +43,17 @@ Returns PopData consisting of `n` offspring resulting from the cross.
 """
 function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, generation::String = "F1")
     # check for presence of parents
-    parent1 ∉ (@view data.meta[!, :name]) && error("$parent not found in PopData")
-    parent2 ∉ (@view data.meta[!, :name]) && error("$parent2 not found in PopData")
-    
+    err = ""
+    err *= parent1 ∉ (@view data.meta[!, :name]) ? "$parent1 " : ""
+    err *= parent2 ∉ (@view data.meta[!, :name]) ? "$parent2" : ""
+    err != "" && error("One or more parents not found in PopData: $err")
+
     # get parental genotypes
     p1 = get_genotypes(data, parent1)
     p2 = get_genotypes(data, parent2)
 
     # check for parents not having mixed ploidy
-    length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent has mixed ploidy, which is unsupported")
+    length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent1 has mixed ploidy, which is unsupported")
     length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
 
     # Get the ploidy value & check for equal ploidy

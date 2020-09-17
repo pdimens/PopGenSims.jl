@@ -13,7 +13,8 @@ using PopGen:
     sort
 
 include("Cross.jl")
-# not yet ready
-#include("SimulateParents.jl")
+include("Sibship.jl")
+include("Utils.jl")
+
 end
 

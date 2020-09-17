@@ -129,3 +129,52 @@ function append(data::PopData, data2::PopData)
     append!(tmp.loci, tmp2.loci)
     return tmp
 end
+
+
+function allele_pool(locus::T) where T <: GenoArray
+  Tuple(Base.Iterators.flatten(skipmissing(locus)))
+end
+
+
+function Base.sort(x::NTuple{N,T}) where N where T <: Signed 
+  Tuple(sort(SVector(x)))
+end
+
+function allele_pool(data::PopData)
+  # index dataframe by locus
+  idx_df = groupby(data.loci, [:locus])
+  # instantiate dict to store alleles
+  allele_dict = Dict{String,NTuple}()
+  # pull out loci names
+  loc = getindex.(keys(idx_df), :locus)
+  [allele_dict[i] = allele_pool(idx_df[(;locus = i)].genotype) for i in loc]
+  return String.(loc), allele_dict
+end
+
+"""
+```
+simulate_sample(alleles::Dict{String,NTuple}, loc::Vector{String}; ploidy::Int)
+```
+Using a global allele pool given by a Dict{loci,alleles} and a list of loci (`loc`), simulate
+an individual with a given `ploidy`. Returns a Vector of genotypes.
+
+**Example**
+```
+julia> cats = nancycats() ;
+julia> loc, alleles = allele_pool(cats) ;
+julia> simulate_parent(alleles, loc, ploidy = 2)
+9-element Array{Array{Int16,1},1}:
+ [139, 129]
+ [146, 146]
+ [145, 141]
+ [126, 126]
+ [150, 148]
+ [148, 140]
+ [185, 199]
+ [91, 113]
+ [208, 208]
+```
+"""
+function simulate_sample(alleles::Dict{String,NTuple}, loc::Vector{String}; ploidy::Int)
+  map(i -> rand(alleles[i], ploidy) ,loc)
+end
