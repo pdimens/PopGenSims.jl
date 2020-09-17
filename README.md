@@ -1,4 +1,4 @@
-![logo](GeneticCrosses.png)
+![logo](PopGenSims.png)
 
 ## Create population genetics simulations
 
