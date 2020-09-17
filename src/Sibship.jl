@@ -62,7 +62,7 @@ function fullsib(data::PopData; n::Int, ploidy::Int)
     for i in 1:n
         prefix = "sim$i"
         p1,p2 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:2]
-        [insertcols!(out_df, Symbol(prefix * "_off$j") => _cross(p1, p2)) for j in 1:2]
+        [insertcols!(out_df, Symbol(prefix * "_fs_off$j") => _cross(p1, p2)) for j in 1:2]
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "fullsib")
@@ -87,8 +87,8 @@ function halfsib(data::PopData; n::Int, ploidy::Int)
     for i in 1:n
         prefix = "sim$i"
         p1,p2,p3 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:3]
-        insertcols!(out_df, Symbol(prefix * "_off1") => _cross(p1, p2))
-        insertcols!(out_df, Symbol(prefix * "_off2") => _cross(p1, p3))
+        insertcols!(out_df, Symbol(prefix * "_hs_off1") => _cross(p1, p2))
+        insertcols!(out_df, Symbol(prefix * "_hs_off2") => _cross(p1, p3))
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "halfsib")
@@ -113,8 +113,8 @@ function unrelated(data::PopData; n::Int, ploidy::Int)
     for i in 1:n
         prefix = "sim$i"
         p1,p2 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:2]
-        insertcols!(out_df, Symbol(prefix * "_off1") => Tuple.(p1))
-        insertcols!(out_df, Symbol(prefix * "_off2") => Tuple.(p2))
+        insertcols!(out_df, Symbol(prefix * "_un_off1") => Tuple.(p1))
+        insertcols!(out_df, Symbol(prefix * "_un_off2") => Tuple.(p2))
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "unrelated")
@@ -147,7 +147,7 @@ Simulated parents will be crossed to generate offspring depending on the `relati
 
 #### Identifying pairs
 The relationship between the newly generated samples can be identified by:
-- Sample `name`s will specify their simulation number and whether parent or offspring
+- Sample `name`s will specify their simulation number, relationship, and whether parent or offspring
 - Their `population` name will be that of their relationship (e.g. "fullsib")
 
 #### Ploidy
@@ -175,21 +175,21 @@ PopData Object
   Latitude: absent
 
 julia> fullsib_sims.meta_df100×5 DataFrame
-│ Row │ name       │ population │ ploidy │ longitude │ latitude │
-│     │ String     │ String     │ Int64  │ Float32?  │ Float32? │
-├─────┼────────────┼────────────┼────────┼───────────┼──────────┤
-│ 1   │ sim1_off1  │ fullsib    │ 2      │ missing   │ missing  │
-│ 2   │ sim1_off2  │ fullsib    │ 2      │ missing   │ missing  │
-│ 3   │ sim2_off1  │ fullsib    │ 2      │ missing   │ missing  │
-│ 4   │ sim2_off2  │ fullsib    │ 2      │ missing   │ missing  │
-│ 5   │ sim3_off1  │ fullsib    │ 2      │ missing   │ missing  │
+│ Row │ name          │ population │ ploidy │ longitude │ latitude │
+│     │ String        │ String     │ Int64  │ Float32?  │ Float32? │
+├─────┼───────────────┼────────────┼────────┼───────────┼──────────┤
+│ 1   │ sim1_fs_off1  │ fullsib    │ 2      │ missing   │ missing  │
+│ 2   │ sim1_fs_off2  │ fullsib    │ 2      │ missing   │ missing  │
+│ 3   │ sim2_fs_off1  │ fullsib    │ 2      │ missing   │ missing  │
+│ 4   │ sim2_fs_off2  │ fullsib    │ 2      │ missing   │ missing  │
+│ 5   │ sim3_fs_off1  │ fullsib    │ 2      │ missing   │ missing  │
 ⋮
-│ 95  │ sim48_off1 │ fullsib    │ 2      │ missing   │ missing  │
-│ 96  │ sim48_off2 │ fullsib    │ 2      │ missing   │ missing  │
-│ 97  │ sim49_off1 │ fullsib    │ 2      │ missing   │ missing  │
-│ 98  │ sim49_off2 │ fullsib    │ 2      │ missing   │ missing  │
-│ 99  │ sim50_off1 │ fullsib    │ 2      │ missing   │ missing  │
-│ 100 │ sim50_off2 │ fullsib    │ 2      │ missing   │ missing  │
+│ 95  │ sim48_fs_off1 │ fullsib    │ 2      │ missing   │ missing  │
+│ 96  │ sim48_fs_off2 │ fullsib    │ 2      │ missing   │ missing  │
+│ 97  │ sim49_fs_off1 │ fullsib    │ 2      │ missing   │ missing  │
+│ 98  │ sim49_fs_off2 │ fullsib    │ 2      │ missing   │ missing  │
+│ 99  │ sim50_fs_off1 │ fullsib    │ 2      │ missing   │ missing  │
+│ 100 │ sim50_fs_off2 │ fullsib    │ 2      │ missing   │ missing  │
 ```
 """
 function simulate_sibship(data::PopData; n::Int = 500, relationship::String = "nothing", ploidy::Int = 2)
