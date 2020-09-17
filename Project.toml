@@ -14,6 +14,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 [compat]
 DataFrames = "0.21"
 InvertedIndices = "1.0"
+PooledArrays = "0.5"
 PopGen = "0.0.3"
 julia = "1.4"
 
