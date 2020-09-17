@@ -1,6 +1,7 @@
-module GeneticCrosses
+module PopGenSims
 
-using DataFrames, PooledArrays
+using DataFrames, PooledArrays, StaticArrays
+using StatsBase: sample
 using PopGen:
     PopData,
     Genotype,
@@ -8,9 +9,11 @@ using PopGen:
     get_genotypes,
     read_from,
     write_to,
-    nancycats
+    nancycats, 
+    sort
 
 include("Cross.jl")
-
+# not yet ready
+#include("SimulateParents.jl")
 end
 

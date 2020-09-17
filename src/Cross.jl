@@ -1,31 +1,31 @@
 export cross, backcross
 
 function sample_genotype(geno::T, n_alleles::Int) where T<:Genotype
-    rand(geno, n_alleles)
+    sample(geno, n_alleles, replace = false)
 end
 
 function sample_genotype(geno::Missing, n_alleles::Int)
     return [missing]
 end
 
-function haploid_cross!(data::DataFrame, p1::T, p2::T; n::Int = 100) where T <: GenoArray
+function haploid_cross!(data::DataFrame, p1::T, p2::T; n::Int) where T <: GenoArray
     iter_df = DataFrames.groupby(data, :name)
     for simulation in iter_df
         all_alleles = getindex.(collect.(zip.(p1,p2)), 1)
         offspring_geno = Tuple(Base.Iterators.flatten(rand.(all_alleles, 1)) |> collect)
-        miss_idx = findall.(i -> i == (missing,), offspring_geno) |> Base.Iterators.flatten |> collect
+        miss_idx = reduce(union, findall.(i -> i == (missing,), offspring_geno))
         simulation.genotype[Not(miss_idx)] .= offspring_geno[Not(miss_idx)]
     end
     return data
 end
 
-function polyploid_cross!(data::DataFrame, p1::T, p2::T; n::Int = 100, ploidy::Int = 2) where T <: GenoArray
+function polyploid_cross!(data::DataFrame, p1::T, p2::T; n::Int, ploidy::Int) where T <: GenoArray
     iter_df = DataFrames.groupby(data, :name)
     n_alleles = ploidy ÷ 2
     for simulation in iter_df
         p1_contrib = Base.Iterators.flatten(sample_genotype.(p1, n_alleles)) |> collect
         p2_contrib = Base.Iterators.flatten(sample_genotype.(p2, n_alleles)) |> collect
-        miss_idx = findall.(ismissing, [p1_contrib, p2_contrib]) |> Base.Iterators.flatten |> unique
+        miss_idx = reduce(union, findall.(ismissing, [p1_contrib, p2_contrib]))
         offspring_geno = zip(p1_contrib, p2_contrib) |> collect
         simulation.genotype[Not(miss_idx)] .= offspring_geno[Not(miss_idx)]
     end
