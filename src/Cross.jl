@@ -78,7 +78,7 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     
     # perform the cross
     if p1_ploidy == 1 
-        haploid_cross!(data, parent, parent2, n = n)
+        haploid_cross!(data, parent1, parent2, n = n)
     elseif p1_ploidy ∈  [2, 4, 6, 8] 
         polyploid_cross!(out_loci, p1, p2, n = n, ploidy = p1_ploidy)
     else
@@ -90,7 +90,7 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
         :population => fill(generation, n),
         :latitude => Vector{Union{Missing, Float32}}(undef, n),
         :longitude => Vector{Union{Missing, Float32}}(undef, n),
-        :parents => fill((parent,parent2), n)
+        :parents => fill((parent1,parent2), n)
     )
     PopData(out_meta, out_loci)
 end
@@ -116,7 +116,7 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     parent2 = parent_2.second
 
     # check for presence of parents
-    parent1 ∉ (@view parent_1_data.meta[!, :name]) && error("$parent not found in PopData")
+    parent1 ∉ (@view parent_1_data.meta[!, :name]) && error("$parent1 not found in PopData")
     parent2 ∉ (@view parent_2_data.meta[!, :name]) && error("$parent2 not found in PopData")
     
     # get parental genotypes
@@ -124,7 +124,7 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     p2 = get_genotypes(parent_2_data, parent2)
 
     # check for parents not having mixed ploidy
-    length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent has mixed ploidy, which is unsupported")
+    length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent1 has mixed ploidy, which is unsupported")
     length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
 
     # Get the ploidy value & check for equal ploidy
@@ -157,7 +157,7 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
 
     # perform the cross
     if p1_ploidy == 1 
-        haploid_cross!(data, parent, parent2, n = n)
+        haploid_cross!(data, parent1, parent2, n = n)
     elseif p1_ploidy ∈  [2, 4, 6, 8] 
         polyploid_cross!(out_loci, p1, p2, n = n, ploidy = p1_ploidy)
     else
