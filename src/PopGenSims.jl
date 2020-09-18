@@ -13,6 +13,7 @@ using PopGen:
     sort
 
 include("Cross.jl")
+include("Samples.jl")
 include("Sibship.jl")
 include("Utils.jl")
 
