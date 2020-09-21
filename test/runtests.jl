@@ -1,6 +1,6 @@
-using GeneticCrosses
+using PopGenSims
 using Test
 
-@testset "GeneticCrosses.jl" begin
+@testset "PopGenSims.jl" begin
     # Write your tests here.
 end
