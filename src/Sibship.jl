@@ -154,7 +154,7 @@ The relationship between the newly generated samples can be identified by:
 If the samples in your `PopData` are of a single ploidy, then `ploidy = 0` (the default) will infer the ploidy
 and generate parents and offspring according to the ploidy of your data. If you have mixed-ploidy data or wish 
 to generate parents and offspring of a ploidy different than the source `PopData` you can specify the ploidy
-with which to geerate parents and offspring. For example, if your `PopData` is diploid, but you wish to generate
+with which to simulate parents and offspring. For example, if your `PopData` is diploid, but you wish to generate
 triploid or octoploid parents and offspring, you would specify `ploidy = 3` or `ploidy = 8` repectively. 
 #### Odd ploidy
 If trying to create offspring with an odd ploidy (3,5, etc.), each parent has a 50% chance of 
