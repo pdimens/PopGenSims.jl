@@ -135,7 +135,7 @@ end
 """
     simulate_sibship(data::PopData; n::Int, relationship::String, ploidy::Int)
 Simulate mating crosses to generate `n` sample pairs (default: `500`) having the specified `relationship`, 
-returning a `PopData` object. The simulations will first generate parents of the given `ploidy` (default: `2`) 
+returning a `PopData` object. The simulations will first generate parents of a given `ploidy` (inferred or specified) 
 by drawing alleles from a global allele pool derived from the given `data` (i.e. weighted by their frequencies).
 
 #### Relationship
@@ -151,10 +151,11 @@ The relationship between the newly generated samples can be identified by:
 - Their `population` name will be that of their relationship (e.g. "fullsib")
 
 #### Ploidy
-If your data is not diploid, then change this value to the appropriate ploidy. While the simulations default to 
-diploid, if you wish to generate parents and offspring of a ploidy different than the source `PopData` you can 
-change this value. For example, if your `PopData` is diploid, but you wish to generate triploid or octoploid 
-parents and offspring, you can. 
+If the samples in your `PopData` are of a single ploidy, then `ploidy = 0` (the default) will infer the ploidy
+and generate parents and offspring according to the ploidy of your data. If you have mixed-ploidy data or wish 
+to generate parents and offspring of a ploidy different than the source `PopData` you can specify the ploidy
+with which to geerate parents and offspring. For example, if your `PopData` is diploid, but you wish to generate
+triploid or octoploid parents and offspring, you would specify `ploidy = 3` or `ploidy = 8` repectively. 
 #### Odd ploidy
 If trying to create offspring with an odd ploidy (3,5, etc.), each parent has a 50% chance of 
 contributing (½ × ploidy) + 1 alleles for all loci to the offspring. In other words, if ploidy = 3,
@@ -192,11 +193,20 @@ julia> fullsib_sims.meta_df100×5 DataFrame
 │ 100 │ sim50_fs_off2 │ fullsib    │ 2      │ missing   │ missing  │
 ```
 """
-function simulate_sibship(data::PopData; n::Int = 500, relationship::String = "nothing", ploidy::Int = 2)
+function simulate_sibship(data::PopData; n::Int = 500, relationship::String = "nothing", ploidy::Int = 0)
     if relationship == "nothing"
         error("Please use the keyword \'relationship\' and specify one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parent-offspring\"") 
     elseif relationship ∉ ["fullsib", "halfsib", "unrelated", "parent-offspring"]
         error("relationship = \"$relationship\" is invalid, please specify one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parent-offspring\"")
+    end
+    # automatic ploidy finding
+    if ploidy == 0
+        ploids = unique(data.meta.ploidy)
+        if length(ploids) != 1
+            error("For mixed ploidy data, please specify a single ploidy with which to generate parents and offspring")
+        else
+            ploidy += first(ploids)    
+        end
     end
     if relationship == "fullsib"
         fullsib(data, n = n, ploidy = ploidy)
