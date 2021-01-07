@@ -9,7 +9,6 @@ using PopGen:
     get_genotypes,
     read_from,
     write_to,
-    nancycats, 
     sort
 
 include("Cross.jl")
@@ -18,4 +17,3 @@ include("Sibship.jl")
 include("Utils.jl")
 
 end
-
