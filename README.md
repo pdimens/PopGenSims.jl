@@ -10,7 +10,10 @@ simulates offspring that would be generated under certain conditions. With this 
 ```julia
 julia>]
 
-pkg(v1.5)> add "http://github.com/pdimens/PopGenSims.jl"
+pkg(v1.5)> add PopGenSims
+
+# or in a notebook
+julia> using Pkg ; Pkg.add("PopGenSims")
 ```
 
 ### Usage
