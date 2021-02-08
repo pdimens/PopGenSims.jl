@@ -1,7 +1,7 @@
 export cross, backcross
 
 function sample_genotype(geno::T, n_alleles::Int) where T<:Genotype
-    sample(SVector(geno), n_alleles, replace = false)
+    sample(Xoroshiro128Star(), SVector(geno), n_alleles, replace = false)
 end
 
 function sample_genotype(geno::Missing, n_alleles::Int)
@@ -12,7 +12,7 @@ function haploid_cross!(data::DataFrame, p1::T, p2::T; n::Int) where T <: GenoAr
     iter_df = DataFrames.groupby(data, :name)
     for simulation in iter_df
         all_alleles = getindex.(collect.(zip.(p1,p2)), 1)
-        offspring_geno = Tuple(Base.Iterators.flatten(rand.(all_alleles, 1)) |> collect)
+        offspring_geno = Tuple(Base.Iterators.flatten(rand.(Xoroshiro128Star(), all_alleles, 1)) |> collect)
         miss_idx = reduce(union, findall.(i -> i == (missing,), offspring_geno))
         simulation.genotype[Not(miss_idx)] .= offspring_geno[Not(miss_idx)]
     end
@@ -71,7 +71,6 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     out_population = fill(generation, n * length(loci))
     out_geno = similar(p1, n * length(loci))
     out_loci = DataFrame(:name => out_offspring, :population => out_population, :locus => out_loci_names, :genotype => out_geno)
-    #categorical!(out_loci, [:name, :population, :locus], compress = true)
     out_loci.name = PooledArray(out_loci.name)
     out_loci.population = PooledArray(out_loci.population)
     out_loci.locus = PooledArray(out_loci.locus)
