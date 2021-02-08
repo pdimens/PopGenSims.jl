@@ -17,21 +17,19 @@ cats = @nancycats ;
     @test typeof(cats2) == PopData 
 end
 
-@testset "allele pool and sort" begin
-    @test allele_pool(cats.loci.genotype[1:30]) |> length == 56
-    @test allele_pool(cats.loci.genotype[1:30]) |> typeof <: NTuple
-    @test issorted(allele_pool(cats.loci.genotype[1:30]) |> sort) == true
-    a,b = allele_pool(cats)
+@testset "allele pool" begin
+    @test PopGenSims.allele_pool(cats.loci.genotype[1:30]) |> length == 56
+    @test PopGenSims.allele_pool(cats.loci.genotype[1:30]) |> typeof <: NTuple
+    a,b = PopGenSims.allele_pool(cats)
     @test eltype(a) == String
     @test length(a) == 9
     @test typeof(b) <: Dict
     @test length(b) == length(a)
-    c = simulate_sample(b, a, ploidy = 2)
+    c = PopGenSims.simulate_sample(b, a, ploidy = 2)
     @test length(c) == length(a) == length(b)
     @test all(length.(c) .== 2)
-    c3 = simulate_sample(b, a, ploidy = 3)
+    c3 = PopGenSims.simulate_sample(b, a, ploidy = 3)
     @test all(length.(c3) .== 3)
 end
-
 
 end # module

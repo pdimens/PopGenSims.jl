@@ -7,10 +7,10 @@ using Test
 cats = @nancycats ;
 
 @testset "sample_genotypes" begin
-    @test length(sample_genotype(cats.loci.genotype[30], 2)) == 2
-    @test eltype(sample_genotype(cats.loci.genotype[30],1)) == eltype(cats.loci.genotype[30])
-    @test length(sample_genotype(missing, 2)) == 1
-    @test first(sample_genotype(missing, 2)) === missing
+    @test length(PopGenSims.sample_genotype(cats.loci.genotype[30], 2)) == 2
+    @test eltype(PopGenSims.sample_genotype(cats.loci.genotype[30],1)) == eltype(cats.loci.genotype[30])
+    @test length(PopGenSims.sample_genotype(missing, 2)) == 1
+    @test first(PopGenSims.sample_genotype(missing, 2)) === missing
 end
 
 @testset "crosses" begin

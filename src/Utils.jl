@@ -133,11 +133,6 @@ function allele_pool(locus::T) where T <: GenoArray
   Tuple(Base.Iterators.flatten(skipmissing(locus)))
 end
 
-
-function Base.sort(x::NTuple{N,T}) where N where T <: Signed 
-  Tuple(sort(SVector(x)))
-end
-
 function allele_pool(data::PopData)
   # index dataframe by locus
   idx_df = groupby(data.loci, [:locus])
