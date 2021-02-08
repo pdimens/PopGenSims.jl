@@ -59,7 +59,6 @@ function Base.append!(data::PopData, data2::PopData)
     
     append!(data.meta, data2.meta)
 
-    data.loci.name = decompress(data.loci.name)
     append!(data.loci, data2.loci)
     return data
 end
@@ -125,7 +124,6 @@ function append(data::PopData, data2::PopData)
     
     append!(tmp.meta, tmp2.meta)
 
-    tmp.loci.name = decompress(tmp.loci.name)
     append!(tmp.loci, tmp2.loci)
     return tmp
 end
@@ -162,7 +160,7 @@ an individual with a given `ploidy`. Returns a Vector of genotypes.
 ```
 julia> cats = nancycats() ;
 julia> loc, alleles = allele_pool(cats) ;
-julia> simulate_parent(alleles, loc, ploidy = 2)
+julia> simulate_sample(alleles, loc, ploidy = 2)
 9-element Array{Array{Int16,1},1}:
  [139, 129]
  [146, 146]
@@ -176,5 +174,5 @@ julia> simulate_parent(alleles, loc, ploidy = 2)
 ```
 """
 function simulate_sample(alleles::Dict{String,NTuple}, loc::Vector{String}; ploidy::Int)
-  map(i -> rand(alleles[i], ploidy) ,loc)
+  map(i -> rand(Xoroshiro128Star(), alleles[i], ploidy) ,loc)
 end
