@@ -1,5 +1,7 @@
 ![logo](PopGenSims.png)
-[![alt text](https://img.shields.io/badge/docs-stable-informational?style=for-the-badge&logo=Read%20The%20Docs&logoColor=white)](https://pdimens.github.io/PopGen.jl/docs/simulations/simulate_samples) 
+[![alt text](https://img.shields.io/badge/docs-stable-informational?style=for-the-badge&logo=Read%20The%20Docs&logoColor=white)](https://pdimens.github.io/PopGen.jl/docs/simulations/simulate_samples)
+[![alt text](https://img.shields.io/badge/slack-join%20PopGen.jl-9d72b1?style=for-the-badge&logo=slack)](https://join.slack.com/t/popgenjl/shared_invite/zt-deam65n8-DuBs2z1oDtsbBuRplJW~Pg)
+
 
 ## Create population genetics simulations
 
