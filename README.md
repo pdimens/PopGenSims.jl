@@ -5,7 +5,7 @@
 
 
 
-## Create population genetics simulations
+## Simulate individuals for population genetics
 
 This package builds off of [PopGen.jl](http://github.com/BioJulia/PopGen.jl) and 
 simulates offspring that would be generated under certain conditions. With this package you can simulate the offspring of specific individuals, simulate full-sibs, half-sibs, unrelated individuals, and parent-offspring pairs for use with PopGen.jl. You can also randomly generate samples given population-specific allele frequencies.
