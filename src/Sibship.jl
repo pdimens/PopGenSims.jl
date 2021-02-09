@@ -9,21 +9,21 @@ function _cross(parent1::Vector{Vector{T}}, parent2::Vector{Vector{T}}) where T 
     ploidy = length(first(parent1))
     ploidy == 1 && error("Haploid crosses are not yet supported. Please file and issue or pull request")
     if ploidy == 2
-        p1_contrib = rand.(parent1)
-        p2_contrib = rand.(parent2)
+        p1_contrib = rand.(Xoroshiro128Star(),parent1)
+        p2_contrib = rand.(Xoroshiro128Star(),parent2)
         geno_out = sort.(zip(p1_contrib, p2_contrib))
     elseif iseven(ploidy)
         n_allele = ploidy ÷ 2
-        p1_contrib = sample.(parent1, n_allele, replace = false)
-        p2_contrib = sample.(parent2, n_allele, replace = false)
+        p1_contrib = sample.(Xoroshiro128Star(),parent1, n_allele, replace = false)
+        p2_contrib = sample.(Xoroshiro128Star(),parent2, n_allele, replace = false)
         geno_out = Tuple.(sort!.(append!.(p1_contrib, p2_contrib)))
     else
         # special method to provide a 50% chance of one parent giving more alleles than the other
-        rng = rand()
+        rng = rand(Xoroshiro128Star())
         contrib_1 = ploidy ÷ 2
         contrib_2 = ploidy - contrib_1
-        p1_contrib = rng > 0.5 ? sample.(parent1, contrib_1, replace = false) : sample.(parent1, contrib_2, replace = false)
-        p2_contrib = rng > 0.5 ? sample.(parent2, contrib_2, replace = false) : sample.(parent2, contrib_1, replace = false)
+        p1_contrib = rng > 0.5 ? sample.(Xoroshiro128Star(),parent1, contrib_1, replace = false) : sample.(Xoroshiro128Star(),parent1, contrib_2, replace = false)
+        p2_contrib = rng > 0.5 ? sample.(Xoroshiro128Star(),parent2, contrib_2, replace = false) : sample.(Xoroshiro128Star(),parent2, contrib_1, replace = false)
         geno_out = Tuple.(sort!.(append!.(p1_contrib, p2_contrib)))
     end
     return geno_out
@@ -195,9 +195,9 @@ julia> fullsib_sims.meta_df100×5 DataFrame
 """
 function simulate_sibship(data::PopData; n::Int = 500, relationship::String = "nothing", ploidy::Int = 0)
     if relationship == "nothing"
-        error("Please use the keyword \'relationship\' and specify one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parent-offspring\"") 
+        throw(ArgumentError("Please use the keyword \'relationship\' and specify one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parent-offspring\""))
     elseif relationship ∉ ["fullsib", "halfsib", "unrelated", "parent-offspring"]
-        error("relationship = \"$relationship\" is invalid, please specify one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parent-offspring\"")
+        throw(ArgumentError("relationship = \"$relationship\" is invalid, please specify one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parent-offspring\""))
     end
     # automatic ploidy finding
     if ploidy == 0

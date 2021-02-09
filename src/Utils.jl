@@ -59,7 +59,6 @@ function Base.append!(data::PopData, data2::PopData)
     
     append!(data.meta, data2.meta)
 
-    data.loci.name = decompress(data.loci.name)
     append!(data.loci, data2.loci)
     return data
 end
@@ -125,7 +124,6 @@ function append(data::PopData, data2::PopData)
     
     append!(tmp.meta, tmp2.meta)
 
-    tmp.loci.name = decompress(tmp.loci.name)
     append!(tmp.loci, tmp2.loci)
     return tmp
 end
@@ -135,20 +133,16 @@ function allele_pool(locus::T) where T <: GenoArray
   Tuple(Base.Iterators.flatten(skipmissing(locus)))
 end
 
-
-function Base.sort(x::NTuple{N,T}) where N where T <: Signed 
-  Tuple(sort(SVector(x)))
-end
-
 function allele_pool(data::PopData)
   # index dataframe by locus
   idx_df = groupby(data.loci, [:locus])
   # instantiate dict to store alleles
-  allele_dict = Dict{String,NTuple}()
+  #allele_dict = Dict{String,Tuple}()
   # pull out loci names
   loc = getindex.(keys(idx_df), :locus)
-  [allele_dict[i] = allele_pool(idx_df[(;locus = i)].genotype) for i in loc]
-  return String.(loc), allele_dict
+  allele_dict = Dict(i => allele_pool(idx_df[(;locus = i)].genotype) for i in loc)
+  #[allele_dict[i] = allele_pool(idx_df[(;locus = i)].genotype) for i in loc]
+  return string.(loc), allele_dict
 end
 
 """
@@ -162,7 +156,7 @@ an individual with a given `ploidy`. Returns a Vector of genotypes.
 ```
 julia> cats = nancycats() ;
 julia> loc, alleles = allele_pool(cats) ;
-julia> simulate_parent(alleles, loc, ploidy = 2)
+julia> simulate_sample(alleles, loc, ploidy = 2)
 9-element Array{Array{Int16,1},1}:
  [139, 129]
  [146, 146]
@@ -175,6 +169,6 @@ julia> simulate_parent(alleles, loc, ploidy = 2)
  [208, 208]
 ```
 """
-function simulate_sample(alleles::Dict{String,NTuple}, loc::Vector{String}; ploidy::Int)
-  map(i -> rand(alleles[i], ploidy) ,loc)
+function simulate_sample(alleles::Dict{String,<:Tuple}, loc::Vector{String}; ploidy::Int)
+  map(i -> rand(Xoroshiro128Star(), alleles[i], ploidy) ,loc)
 end

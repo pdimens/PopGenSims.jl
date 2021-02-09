@@ -1,15 +1,17 @@
 module PopGenSims
 
 using DataFrames, PooledArrays, StaticArrays
-using StatsBase: sample
+using StatsBase: sample, Weights
+using RandomNumbers.Xorshifts
 using PopGen:
-    PopData,
+    allele_freq,
     Genotype,
     GenoArray,
     get_genotypes,
+    PopData,
     read_from,
-    write_to,
-    sort
+    sort,
+    write_to
 
 include("Cross.jl")
 include("Samples.jl")

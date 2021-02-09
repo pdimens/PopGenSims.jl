@@ -31,7 +31,7 @@ julia> sample_locus(d, 3, 3)
 function sample_locus(locus::Dict, n::Int, ploidy::Signed)
     isempty(locus) && return fill(missing, n)
     k,v = collect(keys(locus)), collect(values(locus))
-    alleles = [sample(k, Weights(v), n) for i in 1:ploidy]
+    alleles = [sample(Xoroshiro128Star(), k, Weights(v), n) for i in 1:ploidy]
     Tuple.(sort.(eachrow(hcat(alleles...))))
 end
 
@@ -55,34 +55,38 @@ PopData Object
   Coordinates: absent
   julia> sims.meta
 
-1700×5 DataFrame
-│ Row  │ name     │ population │ ploidy │ longitude │ latitude │
-│      │ String   │ String     │ Int64  │ Missing   │ Missing  │
-├──────┼──────────┼────────────┼────────┼───────────┼──────────┤
-│ 1    │ sim_1    │ 1          │ 2      │ missing   │ missing  │
-│ 2    │ sim_2    │ 1          │ 2      │ missing   │ missing  │
-│ 3    │ sim_3    │ 1          │ 2      │ missing   │ missing  │
-│ 4    │ sim_4    │ 1          │ 2      │ missing   │ missing  │
-⋮
-│ 1696 │ sim_1696 │ 17         │ 2      │ missing   │ missing  │
-│ 1697 │ sim_1697 │ 17         │ 2      │ missing   │ missing  │
-│ 1698 │ sim_1698 │ 17         │ 2      │ missing   │ missing  │
-│ 1699 │ sim_1699 │ 17         │ 2      │ missing   │ missing  │
-│ 1700 │ sim_1700 │ 17         │ 2      │ missing   │ missing  │  
+  1700×5 DataFrame
+  Row │ name      population  ploidy  longitude  latitude 
+      │ String    String      Int8    Missing    Missing  
+──────┼───────────────────────────────────────────────────
+    1 │ sim_1     1                2   missing   missing  
+    2 │ sim_2     1                2   missing   missing  
+    3 │ sim_3     1                2   missing   missing  
+    4 │ sim_4     1                2   missing   missing  
+    5 │ sim_5     1                2   missing   missing  
+  ⋮   │    ⋮          ⋮         ⋮         ⋮         ⋮
+ 1697 │ sim_1697  17               2   missing   missing  
+ 1698 │ sim_1698  17               2   missing   missing  
+ 1699 │ sim_1699  17               2   missing   missing  
+ 1700 │ sim_1700  17               2   missing   missing  
+                                         1691 rows omitted
+
 julia> sims.loci
 15300×4 DataFrame
-│ Row   │ name     │ population │ locus  │ genotype   │
-│       │ String   │ String     │ String │ Tuple…?    │
-├───────┼──────────┼────────────┼────────┼────────────┤
-│ 1     │ sim_1    │ 1          │ fca8   │ (135, 135) │
-│ 2     │ sim_1    │ 1          │ fca23  │ (132, 140) │
-│ 3     │ sim_1    │ 1          │ fca43  │ (139, 139) │
-│ 4     │ sim_1    │ 1          │ fca45  │ (126, 126) │
-⋮
-│ 15297 │ sim_1700 │ 17         │ fca78  │ (142, 142) │
-│ 15298 │ sim_1700 │ 17         │ fca90  │ (199, 199) │
-│ 15299 │ sim_1700 │ 17         │ fca96  │ (113, 113) │
-│ 15300 │ sim_1700 │ 17         │ fca37  │ (208, 208) │
+   Row │ name      population  locus   genotype   
+       │ String    String      String  Tuple…?    
+───────┼──────────────────────────────────────────
+     1 │ sim_1     1           fca8    (135, 143)
+     2 │ sim_1     1           fca23   (136, 146)
+     3 │ sim_1     1           fca43   (141, 145)
+     4 │ sim_1     1           fca45   (120, 126)
+     5 │ sim_1     1           fca77   (156, 156)
+   ⋮   │    ⋮          ⋮         ⋮         ⋮
+ 15297 │ sim_1700  17          fca78   (150, 150)
+ 15298 │ sim_1700  17          fca90   (197, 197)
+ 15299 │ sim_1700  17          fca96   (113, 113)
+ 15300 │ sim_1700  17          fca37   (208, 208)
+                                15291 rows omitted
 ```
 """
 function simulate(data::PopData; n::Int = 100)
@@ -113,6 +117,13 @@ function simulate(data::PopData; n::Int = 100)
     for pop in pops
         out_gdf[(population = pop,)].genotype .= reduce(hcat, geno_gdf[(population = pop,)].frq) |> permutedims |> vec
     end
+    transform!(
+        geno_out,
+        :name => PooledArray => :name,
+        :population => PooledArray => :population,
+        :locus => PooledArray => :locus,
+        :genotype
+    )
 
     # regenerate meta info
     meta_df = DataFrames.combine(
@@ -120,7 +131,7 @@ function simulate(data::PopData; n::Int = 100)
         :name => first => :name,
         :population => first => :population
     )
-    meta_df[!, :ploidy] .= 2
+    meta_df[!, :ploidy] .= ploidy
     meta_df[!, :longitude] .= missing
     meta_df[!, :latitude] .= missing
 
