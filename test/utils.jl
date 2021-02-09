@@ -17,7 +17,6 @@ cats2 = deepcopy(cats)
     @test typeof(cats2) == PopData 
 end
 
-#=
 @testset "allele pool" begin
     @test PopGenSims.allele_pool(cats.loci.genotype[1:30]) |> length == 56
     @test PopGenSims.allele_pool(cats.loci.genotype[1:30]) |> typeof <: NTuple
@@ -32,5 +31,5 @@ end
     c3 = PopGenSims.simulate_sample(b, a, ploidy = 3)
     @test all(length.(c3) .== 3)
 end
-=#
+
 end # module
