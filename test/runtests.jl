@@ -9,8 +9,8 @@ using Test
 all_tests = [
     "cross.jl",
     "samples.jl",
+    "utils.jl",
     "sibship.jl",
-    "utils.jl"
 ]
 
 println("Running tests:")
