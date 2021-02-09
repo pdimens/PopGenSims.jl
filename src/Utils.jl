@@ -137,11 +137,12 @@ function allele_pool(data::PopData)
   # index dataframe by locus
   idx_df = groupby(data.loci, [:locus])
   # instantiate dict to store alleles
-  allele_dict = Dict{String,NTuple}()
+  #allele_dict = Dict{String,Tuple}()
   # pull out loci names
   loc = getindex.(keys(idx_df), :locus)
-  [allele_dict[i] = allele_pool(idx_df[(;locus = i)].genotype) for i in loc]
-  return String.(loc), allele_dict
+  allele_dict = Dict(i => allele_pool(idx_df[(;locus = i)].genotype) for i in loc)
+  #[allele_dict[i] = allele_pool(idx_df[(;locus = i)].genotype) for i in loc]
+  return string.(loc), allele_dict
 end
 
 """
@@ -168,6 +169,6 @@ julia> simulate_sample(alleles, loc, ploidy = 2)
  [208, 208]
 ```
 """
-function simulate_sample(alleles::Dict{String,NTuple}, loc::Vector{String}; ploidy::Int)
+function simulate_sample(alleles::Dict{String,<:Tuple}, loc::Vector{String}; ploidy::Int)
   map(i -> rand(Xoroshiro128Star(), alleles[i], ploidy) ,loc)
 end
