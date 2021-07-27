@@ -43,17 +43,17 @@ allele frequencies derived from a `PopData` object. Returns a new `PopData` obje
 
 **Example**
 ```julia
-cats = nancycats();
+cats = @nanycats;
 
 julia> sims = simulate(cats , n = 100)
 PopData Object
-  Markers: Microsatellite
+  9 Microsatellite Loci
   Ploidy: 2
   Samples: 1700
-  Loci: 9
   Populations: 17
   Coordinates: absent
-  julia> sims.meta
+  
+julia> sims.meta
 
   1700×5 DataFrame
   Row │ name      population  ploidy  longitude  latitude 

@@ -9,37 +9,31 @@ the two `PopData` objects do not have identical loci.
 
 **Example**
 ```
-julia> cats = nancycats()
+julia> cats = @nancycats
 PopData Object
-  Markers: Microsatellite
+  9 Microsatellite Loci
   Ploidy: 2
   Samples: 237
-  Loci: 9
   Populations: 17
-  Longitude: absent
-  Latitude: absent
+  Coordinates: absent
 
 julia> purrfect_pairs = cross(cats, "N200", "N7", generation = "F1")
 PopData Object
-  Markers: Microsatellite
+  9 Microsatellite Loci
   Ploidy: 2
   Samples: 100
-  Loci: 9
   Populations: 1
-  Longitude: absent
-  Latitude: absent
+  Coordinates: absent
 
 julia> append!(cats, purrfect_pairs);
 
 julia> cats
 PopData Object
-  Markers: Microsatellite
+  9 Microsatellite
   Ploidy: 2
   Samples: 337
-  Loci: 9
   Populations: 18
-  Longitude: absent
-  Latitude: absent
+  Coordinates: absent
 ```
 """
 function Base.append!(data::PopData, data2::PopData)
@@ -73,35 +67,29 @@ objects do not have identical loci.
 
 **Example**
 ```
-julia> cats = nancycats()
+julia> cats = @nanycats
 PopData Object
-  Markers: Microsatellite
+  9 Microsatellite Loci
   Ploidy: 2
   Samples: 237
-  Loci: 9
   Populations: 17
-  Longitude: absent
-  Latitude: absent
+  Coordinates: absent
 
 julia> purrfect_pairs = cross(cats, "N200", "N7", generation = "F1")
 PopData Object
-  Markers: Microsatellite
+  9 Microsatellite Loci
   Ploidy: 2
   Samples: 100
-  Loci: 9
   Populations: 1
-  Longitude: absent
-  Latitude: absent
+  Coordinates: absent
 
 julia> merged_cats = append(cats, purrfect_pairs)
 PopData Object
-  Markers: Microsatellite
+  9 Microsatellite Loci
   Ploidy: 2
   Samples: 337
-  Loci: 9
   Populations: 18
-  Longitude: absent
-  Latitude: absent
+  Coordinates: absent
 ```
 """
 function append(data::PopData, data2::PopData)
@@ -154,7 +142,7 @@ an individual with a given `ploidy`. Returns a Vector of genotypes.
 
 **Example**
 ```
-julia> cats = nancycats() ;
+julia> cats = @nanycats ;
 julia> loc, alleles = allele_pool(cats) ;
 julia> simulate_sample(alleles, loc, ploidy = 2)
 9-element Array{Array{Int16,1},1}:

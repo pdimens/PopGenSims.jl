@@ -163,17 +163,15 @@ there's a 50% chance parent_1 will give 2 alleles for every locus for that simul
 
 **Example**
 ```
-julia> cats = nancycats() ;
+julia> cats = @nanycats ;
 
 julia> fullsib_sims = simulate_sibship(cats, n = 50, relationship= "fullsib")
 PopData Object
-  Markers: Microsatellite
+  9 Microsatellite Loci
   Ploidy: 2
   Samples: 100
-  Loci: 9
   Populations: 1
-  Longitude: absent
-  Latitude: absent
+  Coordinates: absent
 
 julia> fullsib_sims.meta_df100×5 DataFrame
 │ Row │ name          │ population │ ploidy │ longitude │ latitude │
