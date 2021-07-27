@@ -31,7 +31,7 @@ julia> sample_locus(d, 3, 3)
 function sample_locus(locus::Dict, n::Int, ploidy::Signed)
     isempty(locus) && return fill(missing, n)
     k,v = collect(keys(locus)), collect(values(locus))
-    alleles = [sample(Xoroshiro128Star(), k, Weights(v), n) for i in 1:ploidy]
+    alleles = [sample(k, Weights(v), n) for i in 1:ploidy]
     Tuple.(sort.(eachrow(hcat(alleles...))))
 end
 

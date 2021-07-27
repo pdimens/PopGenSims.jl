@@ -2,7 +2,6 @@ module PopGenSims
 
 using DataFrames, PooledArrays, StaticArrays
 using StatsBase: sample, Weights
-using RandomNumbers.Xorshifts
 using PopGen:
     allele_freq,
     Genotype,
