@@ -170,5 +170,5 @@ julia> simulate_sample(alleles, loc, ploidy = 2)
 ```
 """
 function simulate_sample(alleles::Dict{String,<:Tuple}, loc::Vector{String}; ploidy::Int)
-  map(i -> rand(Xoroshiro128Star(), alleles[i], ploidy) ,loc)
+  map(i -> rand(alleles[i], ploidy) ,loc)
 end
