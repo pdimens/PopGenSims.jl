@@ -107,17 +107,17 @@ end
 
 """
     simulate_sibship(data::PopData; fullsib::Int, halfsib::Int, unrelated::Int, parentoffspring::Int, ploidy::Int)
-Simulate mating crosses to generate sample pairs with the specified relationships, 
+Simulate mating crosses to generate sample pairs with any combination of the specified relationships, 
 returning a `PopData` object. The simulations will first generate parents of a given
 `ploidy` (inferred or specified) by drawing alleles from a global allele pool derived
 from the given `data` (i.e. weighted by their frequencies).
 
 #### Relationship
 Simulated parents will be crossed to generate offspring depending on the relationship:
-- `"fullsib"` : 2 parents generate 2 full-sibling offspring, return 2 offspring
-- `"halfsib` : 3 parents generate 2 half-sibling offspring, returns 2 offspring
-- `"unrelated"` : returns 2 randomly generated individuals from the global allele pools
-- `"parentoffspring"` : 2 parents generate 1 offspring, returns 1 offspring and 1 parent
+- `fullsib` : 2 parents generate 2 full-sibling offspring, return 2 offspring
+- `halfsib` : 3 parents generate 2 half-sibling offspring, returns 2 offspring
+- `unrelated` : returns 2 randomly generated individuals from the global allele pools
+- `parentoffspring` : 2 parents generate 1 offspring, returns 1 offspring and 1 parent
 
 #### Identifying pairs
 The relationship between the newly generated samples can be identified by:
