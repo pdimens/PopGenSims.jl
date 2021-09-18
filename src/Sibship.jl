@@ -30,124 +30,100 @@ function _cross(parent1::Vector{Vector{T}}, parent2::Vector{Vector{T}}) where T 
 end
 
 
-function parentoffspring(data::PopData; n::Int, ploidy::Int)
+function _parentoffspring(data::PopData; n::Int, ploidy::Int)
     loc, alleles = allele_pool(data)
     out_df = DataFrame(:locus => loc)
+    int_digits = length(string(n))
     for i in 1:n
-        prefix = "sim$i"
+        prefix = "sim" * lpad(i, int_digits, '0')
         p1,p2 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:2]
         insertcols!(out_df, Symbol(prefix * "_parent") =>  Tuple.(p1))
         insertcols!(out_df, Symbol(prefix * "_offspring") => _cross(p1, p2))
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "parent_offspring")
-    out_df.name = PooledArray(out_df.name)
-    out_df.population = PooledArray(out_df.population)
-    out_df.locus = PooledArray(out_df.locus)
-    
-    meta_df = DataFrame(
-        :name => unique(out_df.name), 
-        :population => "parent_offspring", 
-        :ploidy => ploidy, 
-        :longitude => Vector{Union{Missing, Float32}}(undef, n*2),
-        :latitude => Vector{Union{Missing, Float32}}(undef, n*2),
-        )
-    return PopData(meta_df, out_df)
+    out_df.name = PooledArray(out_df.name, compress = true)
+    out_df.population = PooledArray(out_df.population, compress = true)
+    out_df.locus = PooledArray(out_df.locus, compress = true) 
+    return out_df
 end
 
 
-function fullsib(data::PopData; n::Int, ploidy::Int)
+function _fullsib(data::PopData; n::Int, ploidy::Int)
     loc, alleles = allele_pool(data)
     out_df = DataFrame(:locus => loc)
+    int_digits = length(string(n))
     for i in 1:n
-        prefix = "sim$i"
+        prefix = "sim" * lpad(i, int_digits, '0')
         p1,p2 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:2]
-        [insertcols!(out_df, Symbol(prefix * "_fs_off$j") => _cross(p1, p2)) for j in 1:2]
+        [insertcols!(out_df, Symbol(prefix * "_fullsib_$j") => _cross(p1, p2)) for j in 1:2]
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "fullsib")
-    out_df.name = PooledArray(out_df.name)
-    out_df.population = PooledArray(out_df.population)
-    out_df.locus = PooledArray(out_df.locus)
-    
-    meta_df = DataFrame(
-        :name => unique(out_df.name), 
-        :population => "fullsib", 
-        :ploidy => ploidy, 
-        :longitude => Vector{Union{Missing, Float32}}(undef, n*2),
-        :latitude => Vector{Union{Missing, Float32}}(undef, n*2),
-        )
-    return PopData(meta_df, out_df)
+    out_df.name = PooledArray(out_df.name, compress = true)
+    out_df.population = PooledArray(out_df.population, compress = true)
+    out_df.locus = PooledArray(out_df.locus, compress = true)
+    return out_df
 end
 
 
-function halfsib(data::PopData; n::Int, ploidy::Int)
+
+function _halfsib(data::PopData; n::Int, ploidy::Int)
     loc, alleles = allele_pool(data)
     out_df = DataFrame(:locus => loc)
+    int_digits = length(string(n))
     for i in 1:n
-        prefix = "sim$i"
+        prefix = "sim" * lpad(i, int_digits, '0')
         p1,p2,p3 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:3]
-        insertcols!(out_df, Symbol(prefix * "_hs_off1") => _cross(p1, p2))
-        insertcols!(out_df, Symbol(prefix * "_hs_off2") => _cross(p1, p3))
+        insertcols!(out_df, Symbol(prefix * "_halfsib_1") => _cross(p1, p2))
+        insertcols!(out_df, Symbol(prefix * "_halfsib_2") => _cross(p1, p3))
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "halfsib")
-    out_df.name = PooledArray(out_df.name)
-    out_df.population = PooledArray(out_df.population)
-    out_df.locus = PooledArray(out_df.locus)
-    
-    meta_df = DataFrame(
-        :name => unique(out_df.name), 
-        :population => "halfsib", 
-        :ploidy => ploidy, 
-        :longitude => Vector{Union{Missing, Float32}}(undef, n*2),
-        :latitude => Vector{Union{Missing, Float32}}(undef, n*2),
-        )
-    return PopData(meta_df, out_df)
+    out_df.name = PooledArray(out_df.name, compress = true)
+    out_df.population = PooledArray(out_df.population, compress = true)
+    out_df.locus = PooledArray(out_df.locus, compress = true)
+    return out_df
 end
 
 
-function unrelated(data::PopData; n::Int, ploidy::Int)
+function _unrelated(data::PopData; n::Int, ploidy::Int)
     loc, alleles = allele_pool(data)
     out_df = DataFrame(:locus => loc)
+    int_digits = length(string(n))
     for i in 1:n
-        prefix = "sim$i"
+        prefix = "sim" * lpad(i, int_digits, '0')
         p1,p2 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:2]
-        insertcols!(out_df, Symbol(prefix * "_un_off1") => Tuple.(p1))
-        insertcols!(out_df, Symbol(prefix * "_un_off2") => Tuple.(p2))
+        insertcols!(out_df, Symbol(prefix * "_unrelated_1") => Tuple.(p1))
+        insertcols!(out_df, Symbol(prefix * "_unrelated_2") => Tuple.(p2))
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "unrelated")
-    out_df.name = PooledArray(out_df.name)
-    out_df.population = PooledArray(out_df.population)
-    out_df.locus = PooledArray(out_df.locus)
-    
-    meta_df = DataFrame(
-        :name => unique(out_df.name), 
-        :population => "unrelated", 
-        :ploidy => ploidy, 
-        :longitude => Vector{Union{Missing, Float32}}(undef, n*2),
-        :latitude => Vector{Union{Missing, Float32}}(undef, n*2),
-        )
-    return PopData(meta_df, out_df)
+    out_df.name = PooledArray(out_df.name, compress = true)
+    out_df.population = PooledArray(out_df.population, compress = true)
+    out_df.locus = PooledArray(out_df.locus, compress = true)
+    return out_df
 end
 
 """
-    simulate_sibship(data::PopData; n::Int, relationship::String, ploidy::Int)
-Simulate mating crosses to generate `n` sample pairs (default: `500`) having the specified `relationship`, 
-returning a `PopData` object. The simulations will first generate parents of a given `ploidy` (inferred or specified) 
-by drawing alleles from a global allele pool derived from the given `data` (i.e. weighted by their frequencies).
+    simulate_sibship(data::PopData; fullsib::Int, halfsib::Int, unrelated::Int, parentoffspring::Int, ploidy::Int)
+Simulate mating crosses to generate sample pairs with the specified relationships, 
+returning a `PopData` object. The simulations will first generate parents of a given
+`ploidy` (inferred or specified) by drawing alleles from a global allele pool derived
+from the given `data` (i.e. weighted by their frequencies).
 
 #### Relationship
-Simulated parents will be crossed to generate offspring depending on the `relationship`:
+Simulated parents will be crossed to generate offspring depending on the relationship:
 - `"fullsib"` : 2 parents generate 2 full-sibling offspring, return 2 offspring
 - `"halfsib` : 3 parents generate 2 half-sibling offspring, returns 2 offspring
 - `"unrelated"` : returns 2 randomly generated individuals from the global allele pools
-- `"parent-offspring"` : 2 parents generate 1 offspring, returns 1 offspring and 1 parent
+- `"parentoffspring"` : 2 parents generate 1 offspring, returns 1 offspring and 1 parent
 
 #### Identifying pairs
 The relationship between the newly generated samples can be identified by:
 - Sample `name`s will specify their simulation number, relationship, and whether parent or offspring
+    - Naming convention: [simulation #]_[relationship]_[offspring #]
+    - example: sim005_fullsib_1 = [simulation 005]_[full sibling]_[offspring 1]
 - Their `population` name will be that of their relationship (e.g. "fullsib")
 
 #### Ploidy
@@ -165,37 +141,38 @@ there's a 50% chance parent_1 will give 2 alleles for every locus for that simul
 ```
 julia> cats = @nanycats ;
 
-julia> fullsib_sims = simulate_sibship(cats, n = 50, relationship= "fullsib")
+julia> cat_sims = simulate_sibship(cats, fullsib = 10, halfsib = 50)
 PopData Object
-  9 Microsatellite Loci
+9 Microsatellite markers
   Ploidy: 2
-  Samples: 100
-  Populations: 1
+  Samples: 120
+  Populations: 2
   Coordinates: absent
 
-julia> fullsib_sims.meta_df100×5 DataFrame
-│ Row │ name          │ population │ ploidy │ longitude │ latitude │
-│     │ String        │ String     │ Int64  │ Float32?  │ Float32? │
-├─────┼───────────────┼────────────┼────────┼───────────┼──────────┤
-│ 1   │ sim1_fs_off1  │ fullsib    │ 2      │ missing   │ missing  │
-│ 2   │ sim1_fs_off2  │ fullsib    │ 2      │ missing   │ missing  │
-│ 3   │ sim2_fs_off1  │ fullsib    │ 2      │ missing   │ missing  │
-│ 4   │ sim2_fs_off2  │ fullsib    │ 2      │ missing   │ missing  │
-│ 5   │ sim3_fs_off1  │ fullsib    │ 2      │ missing   │ missing  │
-⋮
-│ 95  │ sim48_fs_off1 │ fullsib    │ 2      │ missing   │ missing  │
-│ 96  │ sim48_fs_off2 │ fullsib    │ 2      │ missing   │ missing  │
-│ 97  │ sim49_fs_off1 │ fullsib    │ 2      │ missing   │ missing  │
-│ 98  │ sim49_fs_off2 │ fullsib    │ 2      │ missing   │ missing  │
-│ 99  │ sim50_fs_off1 │ fullsib    │ 2      │ missing   │ missing  │
-│ 100 │ sim50_fs_off2 │ fullsib    │ 2      │ missing   │ missing  │
+julia> cat_sims.meta
+120×3 DataFrame
+ Row │ name             population  ploidy 
+     │ String           String      Int64  
+─────┼─────────────────────────────────────
+   1 │ sim01_fullsib_1  fullsib          2
+   2 │ sim01_fullsib_2  fullsib          2
+   3 │ sim02_fullsib_1  fullsib          2
+   4 │ sim02_fullsib_2  fullsib          2
+   5 │ sim03_fullsib_1  fullsib          2
+   6 │ sim03_fullsib_2  fullsib          2
+  ⋮  │        ⋮             ⋮         ⋮
+ 115 │ sim48_halfsib_1  halfsib          2
+ 116 │ sim48_halfsib_2  halfsib          2
+ 117 │ sim49_halfsib_1  halfsib          2
+ 118 │ sim49_halfsib_2  halfsib          2
+ 119 │ sim50_halfsib_1  halfsib          2
+ 120 │ sim50_halfsib_2  halfsib          2
+                           108 rows omitted
 ```
 """
-function simulate_sibship(data::PopData; n::Int = 500, relationship::String = "nothing", ploidy::Int = 0)
-    if relationship == "nothing"
-        throw(ArgumentError("Please use the keyword \'relationship\' and specify one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parent-offspring\""))
-    elseif relationship ∉ ["fullsib", "halfsib", "unrelated", "parent-offspring"]
-        throw(ArgumentError("relationship = \"$relationship\" is invalid, please specify one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parent-offspring\""))
+function simulate_sibship(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unrelated::Int = 0, parentoffspring::Int = 0, ploidy::Int = 0)
+    if iszero(sum([fullsib, halfsib, unrelated, parentoffspring]))
+        throw(ArgumentError("Please specify at least one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parentoffspring\""))
     end
     # automatic ploidy finding
     if ploidy == 0
@@ -206,13 +183,17 @@ function simulate_sibship(data::PopData; n::Int = 500, relationship::String = "n
             ploidy += first(ploids)    
         end
     end
-    if relationship == "fullsib"
-        fullsib(data, n = n, ploidy = ploidy)
-    elseif relationship == "halfsib"
-        halfsib(data, n = n, ploidy = ploidy)
-    elseif relationship == "unrelated"
-        unrelated(data, n = n, ploidy = ploidy)
-    else relationship == "halfsib"
-        parentoffspring(data, n = n, ploidy = ploidy)
-    end
+    # perform the simulation if the integer > 0, otherwise return an empty boolean vector
+    # the empty vector is just to skip over with Base.Iterators.filter
+    fs = fullsib > 0 ? _fullsib(data, n = fullsib, ploidy = ploidy) : Bool[]
+    hs = halfsib > 0 ? _halfsib(data, n = halfsib, ploidy = ploidy) : Bool[]
+    unrl = unrelated > 0 ? _unrelated(data, n = unrelated, ploidy = ploidy) : Bool[]
+    poff = parentoffspring > 0 ? _parentoffspring(data, n = parentoffspring, ploidy = ploidy) : Bool[]
+    # combine the results together into a single df
+    geno_df = reduce(vcat, Base.Iterators.filter(!isempty, (fs, hs, unrl, poff)))
+    geno_df.name = PooledArray(geno_df.name, compress = true)
+    geno_df.population = PooledArray(geno_df.population, compress = true)
+    meta_df = select(unique(geno_df, :name), 1, 2)
+    insertcols!(meta_df, :ploidy => ploidy)
+    return PopData(meta_df, geno_df)
 end
