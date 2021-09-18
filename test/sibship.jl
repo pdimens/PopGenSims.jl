@@ -5,11 +5,17 @@ using PopGenSims
 using Test
 
 cats = @nancycats ;
-sims_un = simulate_sibship(cats, n = 50, relationship= "unrelated")
-sims_hs = simulate_sibship(cats, n = 50, relationship= "halfsib")
-sims_fs = simulate_sibship(cats, n = 50, relationship= "fullsib")
-sims_po = simulate_sibship(cats, n = 50, relationship= "parent-offspring")
+sims_un = simulate_sibship(cats, unrelated = 50)
+sims_hs = simulate_sibship(cats, halfsib = 50)
+sims_fs = simulate_sibship(cats, fullsib = 50)
+sims_po = simulate_sibship(cats, parentoffspring = 50)
+sims_all = simulate_sibship(cats, fullsib = 50, halfsib = 50, unrelated = 50, parentoffspring = 50)
 
+@testset "all sibship" begin
+    @test typeof(sims_all) == PopData
+    @test length(sims_all.meta.name) == 400
+    @test length(sims_all.loci.name) == 3600
+end
 
 @testset "unrelated" begin
     @test typeof(sims_un) == PopData
