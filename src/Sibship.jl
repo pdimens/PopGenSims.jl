@@ -30,12 +30,10 @@ function _cross(parent1::Vector{Vector{T}}, parent2::Vector{Vector{T}}) where T 
 end
 
 
-function _parentoffspring(data::PopData; n::Int, ploidy::Int)
-    loc, alleles = allele_pool(data)
+function _parentoffspring(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, padding::Int)
     out_df = DataFrame(:locus => loc)
-    int_digits = length(string(n))
     for i in 1:n
-        prefix = "sim" * lpad(i, int_digits, '0')
+        prefix = "sim" * lpad(i, padding, '0')
         p1,p2 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:2]
         insertcols!(out_df, Symbol(prefix * "_parent") =>  Tuple.(p1))
         insertcols!(out_df, Symbol(prefix * "_offspring") => _cross(p1, p2))
@@ -49,12 +47,10 @@ function _parentoffspring(data::PopData; n::Int, ploidy::Int)
 end
 
 
-function _fullsib(data::PopData; n::Int, ploidy::Int)
-    loc, alleles = allele_pool(data)
+function _fullsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, padding::Int)
     out_df = DataFrame(:locus => loc)
-    int_digits = length(string(n))
     for i in 1:n
-        prefix = "sim" * lpad(i, int_digits, '0')
+        prefix = "sim" * lpad(i, padding, '0')
         p1,p2 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:2]
         [insertcols!(out_df, Symbol(prefix * "_fullsib_$j") => _cross(p1, p2)) for j in 1:2]
     end
@@ -68,12 +64,10 @@ end
 
 
 
-function _halfsib(data::PopData; n::Int, ploidy::Int)
-    loc, alleles = allele_pool(data)
+function _halfsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, padding::Int)
     out_df = DataFrame(:locus => loc)
-    int_digits = length(string(n))
     for i in 1:n
-        prefix = "sim" * lpad(i, int_digits, '0')
+        prefix = "sim" * lpad(i, padding, '0')
         p1,p2,p3 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:3]
         insertcols!(out_df, Symbol(prefix * "_halfsib_1") => _cross(p1, p2))
         insertcols!(out_df, Symbol(prefix * "_halfsib_2") => _cross(p1, p3))
@@ -87,12 +81,10 @@ function _halfsib(data::PopData; n::Int, ploidy::Int)
 end
 
 
-function _unrelated(data::PopData; n::Int, ploidy::Int)
-    loc, alleles = allele_pool(data)
+function _unrelated(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, padding::Int)
     out_df = DataFrame(:locus => loc)
-    int_digits = length(string(n))
     for i in 1:n
-        prefix = "sim" * lpad(i, int_digits, '0')
+        prefix = "sim" * lpad(i, padding, '0')
         p1,p2 = [simulate_sample(alleles, loc, ploidy = ploidy) for j in 1:2]
         insertcols!(out_df, Symbol(prefix * "_unrelated_1") => Tuple.(p1))
         insertcols!(out_df, Symbol(prefix * "_unrelated_2") => Tuple.(p2))
@@ -183,12 +175,15 @@ function simulate_sibship(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unr
             ploidy += first(ploids)    
         end
     end
+    loc, alleles = allele_pool(data)
+    # how many digits to pad the offspring names
+    padding = length(string(maximum([fullsib, halfsib, unrelated, parentoffspring])))
     # perform the simulation if the integer > 0, otherwise return an empty boolean vector
     # the empty vector is just to skip over with Base.Iterators.filter
-    fs = fullsib > 0 ? _fullsib(data, n = fullsib, ploidy = ploidy) : Bool[]
-    hs = halfsib > 0 ? _halfsib(data, n = halfsib, ploidy = ploidy) : Bool[]
-    unrl = unrelated > 0 ? _unrelated(data, n = unrelated, ploidy = ploidy) : Bool[]
-    poff = parentoffspring > 0 ? _parentoffspring(data, n = parentoffspring, ploidy = ploidy) : Bool[]
+    fs = fullsib > 0 ? _fullsib(alleles, loc, fullsib, ploidy, padding) : Bool[]
+    hs = halfsib > 0 ? _halfsib(alleles, loc, halfsib, ploidy, padding) : Bool[]
+    unrl = unrelated > 0 ? _unrelated(alleles, loc, unrelated, ploidy, padding) : Bool[]
+    poff = parentoffspring > 0 ? _parentoffspring(alleles, loc, parentoffspring, ploidy, padding) : Bool[]
     # combine the results together into a single df
     geno_df = reduce(vcat, Base.Iterators.filter(!isempty, (fs, hs, unrl, poff)))
     geno_df.name = PooledArray(geno_df.name, compress = true)
