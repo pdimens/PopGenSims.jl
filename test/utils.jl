@@ -8,11 +8,12 @@ cats = @nancycats ;
 cats2 = deepcopy(cats)
 
 @testset "append PopData" begin
-    @test length(append(cats, cats2).meta.name) == 2 * length(cats.meta.name)
-    @test length(append(cats, cats2).genodata.name) == 2 * length(cats.genodata.name)
-    @test append(cats, cats2) isa PopData
+    tmp = append(cats, cats2)
+    @test tmp.metadata.samples == 2 * cats.metadata.samples
+    @test length(tmp.genodata.name) == 2 * length(cats.genodata.name)
+    @test tmp isa PopData
     append!(cats2, cats)
-    @test length(cats2.meta.name) == 2 * length(cats.meta.name)
+    @test cats2.metadata.samples == 2 * cats.metadata.samples
     @test length(cats2.genodata.name) == 2 * length(cats.genodata.name)
     @test cats2 isa PopData 
 end
