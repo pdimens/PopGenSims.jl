@@ -10,11 +10,11 @@ cats2 = deepcopy(cats)
 @testset "append PopData" begin
     @test length(append(cats, cats2).meta.name) == 2 * length(cats.meta.name)
     @test length(append(cats, cats2).loci.name) == 2 * length(cats.loci.name)
-    @test typeof(append(cats, cats2)) == PopData
+    @test append(cats, cats2) isa PopData
     append!(cats2, cats)
     @test length(cats2.meta.name) == 2 * length(cats.meta.name)
     @test length(cats2.loci.name) == 2 * length(cats.loci.name)
-    @test typeof(cats2) == PopData 
+    @test cats2 isa PopData 
 end
 
 @testset "allele pool" begin
