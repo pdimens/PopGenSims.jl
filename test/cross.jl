@@ -1,6 +1,6 @@
 module  TestCross
 
-using PopGen
+using PopGenCore
 using PopGenSims
 using Test
 

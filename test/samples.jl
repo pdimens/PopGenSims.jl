@@ -1,6 +1,6 @@
 module SamplesTest
 
-using PopGen
+using PopGenCore
 using PopGenSims
 using Test
 
