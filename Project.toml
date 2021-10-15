@@ -1,7 +1,7 @@
 name = "PopGenSims"
 uuid = "e670a858-c023-4621-870e-30d0f49b8322"
 authors = ["Pavel Dimens <pdimens@live.com> and contributors"]
-version = "0.4.0"
+version = "0.3.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
