@@ -134,14 +134,11 @@ there's a 50% chance parent_1 will give 2 alleles for every locus for that simul
 julia> cats = @nanycats ;
 
 julia> cat_sims = simulate_sibship(cats, fullsib = 10, halfsib = 50)
-PopData Object
-9 Microsatellite markers
-  Ploidy: 2
+PopData{Diploid, 9 Microsatellite loci}
   Samples: 120
   Populations: 2
-  Coordinates: absent
 
-julia> cat_sims.meta
+julia> cat_sims.sampleinfo
 120×3 DataFrame
  Row │ name             population  ploidy 
      │ String           String      Int64  
@@ -168,11 +165,11 @@ function simulate_sibship(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unr
     end
     # automatic ploidy finding
     if ploidy == 0
-        ploids = unique(data.meta.ploidy)
-        if length(ploids) != 1
+        ploids = data.metadata.ploidy
+        if ploids isa AbstractVector
             error("For mixed ploidy data, please specify a single ploidy with which to generate parents and offspring")
         else
-            ploidy += first(ploids)    
+            ploidy += ploids    
         end
     end
     loc, alleles = allele_pool(data)
@@ -188,7 +185,7 @@ function simulate_sibship(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unr
     geno_df = reduce(vcat, Base.Iterators.filter(!isempty, (fs, hs, unrl, poff)))
     geno_df.name = PooledArray(geno_df.name, compress = true)
     geno_df.population = PooledArray(geno_df.population, compress = true)
-    meta_df = select(unique(geno_df, :name), 1, 2)
-    insertcols!(meta_df, :ploidy => ploidy)
-    return PopData(meta_df, geno_df)
+    #meta_df = select(unique(geno_df, :name), 1, 2)
+    #insertcols!(meta_df, :ploidy => ploidy)
+    return PopData(geno_df)
 end

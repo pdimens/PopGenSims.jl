@@ -9,17 +9,17 @@ cats2 = deepcopy(cats)
 
 @testset "append PopData" begin
     @test length(append(cats, cats2).meta.name) == 2 * length(cats.meta.name)
-    @test length(append(cats, cats2).loci.name) == 2 * length(cats.loci.name)
+    @test length(append(cats, cats2).genodata.name) == 2 * length(cats.genodata.name)
     @test append(cats, cats2) isa PopData
     append!(cats2, cats)
     @test length(cats2.meta.name) == 2 * length(cats.meta.name)
-    @test length(cats2.loci.name) == 2 * length(cats.loci.name)
+    @test length(cats2.genodata.name) == 2 * length(cats.genodata.name)
     @test cats2 isa PopData 
 end
 
 @testset "allele pool" begin
-    @test PopGenSims.allele_pool(cats.loci.genotype[1:30]) |> length == 56
-    @test PopGenSims.allele_pool(cats.loci.genotype[1:30]) |> typeof <: NTuple
+    @test PopGenSims.allele_pool(cats.genodata.genotype[1:30]) |> length == 56
+    @test PopGenSims.allele_pool(cats.genodata.genotype[1:30]) |> typeof <: NTuple
     a,b = PopGenSims.allele_pool(cats)
     @test eltype(a) == String
     @test length(a) == 9

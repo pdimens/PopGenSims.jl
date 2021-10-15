@@ -21,7 +21,7 @@ cats = @nancycats ;
         sims = simulate(cats , n = 100)
         @test sims isa PopData
         @test length(sims.meta.name) == 1700
-        @test length(sims.loci.name) == 15300
+        @test length(sims.genodata.name) == 15300
     end
 end
 

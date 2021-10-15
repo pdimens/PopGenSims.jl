@@ -10,50 +10,41 @@ the two `PopData` objects do not have identical loci.
 **Example**
 ```
 julia> cats = @nancycats
-PopData Object
-  9 Microsatellite Loci
-  Ploidy: 2
+PopData{Diploid, 9 Microsatellite Loci}
   Samples: 237
   Populations: 17
-  Coordinates: absent
 
 julia> purrfect_pairs = cross(cats, "N200", "N7", generation = "F1")
-PopData Object
-  9 Microsatellite Loci
-  Ploidy: 2
+PopData{Diploid, 9 Microsatellite Loci}
   Samples: 100
   Populations: 1
-  Coordinates: absent
 
 julia> append!(cats, purrfect_pairs);
 
 julia> cats
-PopData Object
-  9 Microsatellite
-  Ploidy: 2
+PopData{Diploid, 9 Microsatellite Loci}
   Samples: 337
   Populations: 18
-  Coordinates: absent
 ```
 """
 function Base.append!(data::PopData, data2::PopData)
-    if "parents" ∉ names(data.meta) && "parents" ∈ names(data2.meta)
-        len = length(data.meta.name)
+    if "parents" ∉ names(data.sampleinfo) && "parents" ∈ names(data2.sampleinfo)
+        len = data.metadata.samples
         insertcols!(
-            data.meta, 
+            data.sampleinfo, 
             :parents => Vector{Union{Missing, Tuple{String,String}}}(undef, len)
             )
-    elseif "parents" ∉ names(data2.meta) && "parents" ∈ names(data.meta)
-        len = length(data2.meta.name)
+    elseif "parents" ∉ names(data2.sampleinfo) && "parents" ∈ names(data.sampleinfo)
+        len = length(data2.sampleinfo.name)
         insertcols!(
-            data2.meta, 
+            data2.sampleinfo, 
             :parents => Vector{Union{Missing, Tuple{String,String}}}(undef, len)
             )
     end
     
-    append!(data.meta, data2.meta)
+    append!(data.sampleinfo, data2.sampleinfo)
 
-    append!(data.loci, data2.loci)
+    append!(data.genodata, data2.genodata)
     return data
 end
 
@@ -68,52 +59,26 @@ objects do not have identical loci.
 **Example**
 ```
 julia> cats = @nanycats
-PopData Object
-  9 Microsatellite Loci
-  Ploidy: 2
+PopData{Diploid, 9 Microsatellite Loci}
   Samples: 237
   Populations: 17
-  Coordinates: absent
+
 
 julia> purrfect_pairs = cross(cats, "N200", "N7", generation = "F1")
-PopData Object
-  9 Microsatellite Loci
-  Ploidy: 2
+PopData{Diploid, 9 Microsatellite Loci}
   Samples: 100
   Populations: 1
-  Coordinates: absent
 
 julia> merged_cats = append(cats, purrfect_pairs)
-PopData Object
-  9 Microsatellite Loci
-  Ploidy: 2
+PopData{Diploid, 9 Microsatellite Loci}
   Samples: 337
   Populations: 18
-  Coordinates: absent
 ```
 """
 function append(data::PopData, data2::PopData)
-    tmp = PopData(copy(data.meta), copy(data.loci))
-    tmp2 = data2
-    if "parents" ∉ names(data.meta) && "parents" ∈ names(data2.meta)
-        len = length(tmp.meta.name)
-        insertcols!(
-            tmp.meta, 
-            :parents => Vector{Union{Missing, Tuple{String,String}}}(undef, len)
-            )
-    elseif "parents" ∉ names(data2.meta) && "parents" ∈ names(data.meta)
-        tmp2 = PopData(copy(data2.meta), copy(data2.loci))
-        len = length(tmp2.meta.name)
-        insertcols!(
-            tmp2.meta, 
-            :parents => Vector{Union{Missing, Tuple{String,String}}}(undef, len)
-            )
-    end
-    
-    append!(tmp.meta, tmp2.meta)
-
-    append!(tmp.loci, tmp2.loci)
-    return tmp
+  tmp  = PopGenCore.copy(data)
+  append!(tmp, data2)
+  return tmp
 end
 
 
@@ -123,7 +88,7 @@ end
 
 function allele_pool(data::PopData)
   # index dataframe by locus
-  idx_df = groupby(data.loci, [:locus])
+  idx_df = groupby(data.genodata, [:locus])
   # instantiate dict to store alleles
   #allele_dict = Dict{String,Tuple}()
   # pull out loci names

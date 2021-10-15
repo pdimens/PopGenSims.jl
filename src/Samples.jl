@@ -46,14 +46,11 @@ allele frequencies derived from a `PopData` object. Returns a new `PopData` obje
 cats = @nanycats;
 
 julia> sims = simulate(cats , n = 100)
-PopData Object
-  9 Microsatellite Loci
-  Ploidy: 2
+PopData{Diploid, 9 Microsatellite Loci}
   Samples: 1700
   Populations: 17
-  Coordinates: absent
   
-julia> sims.meta
+julia> sims.sampleinfo
 
   1700×5 DataFrame
   Row │ name      population  ploidy  longitude  latitude 
@@ -71,7 +68,7 @@ julia> sims.meta
  1700 │ sim_1700  17               2   missing   missing  
                                          1691 rows omitted
 
-julia> sims.loci
+julia> sims.genodata
 15300×4 DataFrame
    Row │ name      population  locus   genotype   
        │ String    String      String  Tuple…?    
@@ -90,17 +87,17 @@ julia> sims.loci
 ```
 """
 function simulate(data::PopData; n::Int = 100)
-    length(unique(data.meta.ploidy)) != 1 && error("Simulations do not work on mixed-ploidy data (yet)")
-    ploidy = first(unique(data.meta.ploidy))
-    pops = unique(data.meta.population)
-    npops = length(pops)
-    nloci = length(data.loci.locus.pool)
+    data.metadata.ploidy != 2 && error("Simulations do not work on mixed-ploidy data (yet)")
+    ploidy = data.metadata.ploidy
+    pops = unique(data.sampleinfo.population)
+    npops = data.metadata.populations
+    nloci = data.metadata.loci
 
     # instantiate output df
     simnames = reduce(vcat, fill.(["sim_" * "$i" for i in 1:(n*npops)], nloci))
     popnames = reduce(vcat, fill.(pops, (nloci * n)))
-    locinames = reduce(vcat, fill.(Ref(unique(data.loci.locus)), (n * npops)))
-    geno_out = DataFrame(:name => simnames, :population => popnames, :locus => locinames, :genotype => similar(data.loci.genotype, length(locinames)))
+    locinames = reduce(vcat, fill.(Ref(unique(data.genodata.locus)), (n * npops)))
+    geno_out = DataFrame(:name => simnames, :population => popnames, :locus => locinames, :genotype => similar(data.genodata.genotype, length(locinames)))
 
     # generate allele freqs per population
     gdf = groupby(data.loci, [:population, :locus])
@@ -124,7 +121,7 @@ function simulate(data::PopData; n::Int = 100)
         :locus => PooledArray => :locus,
         :genotype
     )
-
+    #=
     # regenerate meta info
     meta_df = DataFrames.combine(
         groupby(geno_out, :name),
@@ -136,4 +133,6 @@ function simulate(data::PopData; n::Int = 100)
     meta_df[!, :latitude] .= missing
 
     PopData(meta_df, geno_out)
+    =#
+    PopData(geno_out)
 end

@@ -44,8 +44,8 @@ Returns PopData consisting of `n` offspring resulting from the cross.
 function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, generation::String = "F1")
     # check for presence of parents
     err = ""
-    err *= parent1 ∉ (@view data.meta[!, :name]) ? "$parent1 " : ""
-    err *= parent2 ∉ (@view data.meta[!, :name]) ? "$parent2" : ""
+    err *= parent1 ∉ (@view data.sampleinfo[!, :name]) ? "$parent1 " : ""
+    err *= parent2 ∉ (@view data.sampleinfo[!, :name]) ? "$parent2" : ""
     err != "" && error("One or more parents not found in PopData: $err")
 
     # get parental genotypes
@@ -61,7 +61,7 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     p2_ploidy = length.(skipmissing(p2)) |> first
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
 
-    loci = unique(data.loci.locus)
+    loci = unique(data.genodata.locus)
     
     # pre-allocate all output information
     out_loci_names = fill(loci, n) |> Base.Iterators.flatten |> collect
@@ -115,8 +115,8 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     parent2 = parent_2.second
 
     # check for presence of parents
-    parent1 ∉ (@view parent_1_data.meta[!, :name]) && error("$parent1 not found in PopData")
-    parent2 ∉ (@view parent_2_data.meta[!, :name]) && error("$parent2 not found in PopData")
+    parent1 ∉ (@view parent_1_data.sampleinfo[!, :name]) && error("$parent1 not found in PopData")
+    parent2 ∉ (@view parent_2_data.sampleinfo[!, :name]) && error("$parent2 not found in PopData")
     
     # get parental genotypes
     p1 = get_genotypes(parent_1_data, parent1)
@@ -132,8 +132,8 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
 
     # verify identical loci
-    loci = unique(parent_1_data.loci.locus)
-    loci_p2 = unique(parent_2_data.loci.locus)
+    loci = unique(parent_1_data.genodata.locus)
+    loci_p2 = unique(parent_2_data.genodata.locus)
     length(loci) != length(loci_p2) && error("Both parents must have the same number of loci. $parent1 : $length(loci) | $parent2 : $length(loci_p2")
     loci_check = loci .!= loci_p2
     culprits_p1 = loci[loci_check]
