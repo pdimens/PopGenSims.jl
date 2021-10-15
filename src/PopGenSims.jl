@@ -8,9 +8,8 @@ using PopGenCore:
     GenoArray,
     get_genotypes,
     PopData, 
-    sort
-
-using PopGen: allele_freq
+    sort,
+    allele_freq
 
 include("Cross.jl")
 include("Samples.jl")
