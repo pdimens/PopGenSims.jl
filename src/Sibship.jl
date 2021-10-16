@@ -40,9 +40,9 @@ function _parentoffspring(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Si
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "parent_offspring")
-    out_df.name = PooledArray(out_df.name, compress = true)
-    out_df.population = PooledArray(out_df.population, compress = true)
-    out_df.locus = PooledArray(out_df.locus, compress = true) 
+    #out_df.name = PooledArray(out_df.name, compress = true)
+    #out_df.population = PooledArray(out_df.population, compress = true)
+    #out_df.locus = PooledArray(out_df.locus, compress = true) 
     return out_df
 end
 
@@ -56,9 +56,9 @@ function _fullsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, pa
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "fullsib")
-    out_df.name = PooledArray(out_df.name, compress = true)
-    out_df.population = PooledArray(out_df.population, compress = true)
-    out_df.locus = PooledArray(out_df.locus, compress = true)
+    #out_df.name = PooledArray(out_df.name, compress = true)
+    #out_df.population = PooledArray(out_df.population, compress = true)
+    #out_df.locus = PooledArray(out_df.locus, compress = true)
     return out_df
 end
 
@@ -74,9 +74,9 @@ function _halfsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, pa
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "halfsib")
-    out_df.name = PooledArray(out_df.name, compress = true)
-    out_df.population = PooledArray(out_df.population, compress = true)
-    out_df.locus = PooledArray(out_df.locus, compress = true)
+    #out_df.name = PooledArray(out_df.name, compress = true)
+    #out_df.population = PooledArray(out_df.population, compress = true)
+    #out_df.locus = PooledArray(out_df.locus, compress = true)
     return out_df
 end
 
@@ -91,9 +91,9 @@ function _unrelated(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, 
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "unrelated")
-    out_df.name = PooledArray(out_df.name, compress = true)
-    out_df.population = PooledArray(out_df.population, compress = true)
-    out_df.locus = PooledArray(out_df.locus, compress = true)
+    #out_df.name = PooledArrayout_df.name, compress = true)
+    #out_df.population = PooledArray(out_df.population, compress = true)
+    #out_df.locus = PooledArray(out_df.locus, compress = true)
     return out_df
 end
 
@@ -185,6 +185,7 @@ function simulate_sibship(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unr
     geno_df = reduce(vcat, Base.Iterators.filter(!isempty, (fs, hs, unrl, poff)))
     geno_df.name = PooledArray(geno_df.name, compress = true)
     geno_df.population = PooledArray(geno_df.population, compress = true)
+    geno_df.locus = PooledArray(geno_df.locus, compress = true)
     #meta_df = select(unique(geno_df, :name), 1, 2)
     #insertcols!(meta_df, :ploidy => ploidy)
     return PopData(geno_df)

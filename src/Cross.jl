@@ -126,8 +126,8 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     parent2 ∉ (@view parent_2_data.sampleinfo[!, :name]) && error("$parent2 not found in PopData")
 
     # Get the ploidy value & check for equal ploidy
-    p1_ploidy = data.sampleinfo.ploidy[data.sampleinfo.name .== parent1] |> first
-    p2_ploidy = data.sampleinfo.ploidy[data.sampleinfo.name .== parent2] |> first
+    p1_ploidy = parent_1_data.sampleinfo.ploidy[data.sampleinfo.name .== parent1] |> first
+    p2_ploidy = parent_2_data.data.sampleinfo.ploidy[data.sampleinfo.name .== parent2] |> first
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
 
     # check for parents not having mixed ploidy
