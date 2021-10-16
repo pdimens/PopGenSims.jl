@@ -100,7 +100,7 @@ function simulate(data::PopData; n::Int = 100)
     geno_out = DataFrame(:name => simnames, :population => popnames, :locus => locinames, :genotype => similar(data.genodata.genotype, length(locinames)))
 
     # generate allele freqs per population
-    gdf = groupby(data.loci, [:population, :locus])
+    gdf = groupby(data.genodata, [:population, :locus])
     freqs = DataFrames.combine(
         gdf,
         :genotype => allele_freq => :frq

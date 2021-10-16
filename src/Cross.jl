@@ -47,21 +47,25 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     err *= parent1 ∉ (@view data.sampleinfo[!, :name]) ? "$parent1 " : ""
     err *= parent2 ∉ (@view data.sampleinfo[!, :name]) ? "$parent2" : ""
     err != "" && error("One or more parents not found in PopData: $err")
+    
+    # Get the ploidy value & check for equal ploidy
+    p1_ploidy = data.sampleinfo.ploidy[data.sampleinfo.name .== parent1] |> first
+    p2_ploidy = data.sampleinfo.ploidy[data.sampleinfo.name .== parent2] |> first
+    p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
+
+    # check for parents not having mixed ploidy
+    if data.metadata.ploidy isa AbstractVector
+        p1_ploidy isa AbstractVector && error("Parent $parent1 has mixed ploidy, which is unsupported")
+        p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
+        #length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent1 has mixed ploidy, which is unsupported")
+        #length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
+    end
 
     # get parental genotypes
     p1 = get_genotypes(data, parent1)
     p2 = get_genotypes(data, parent2)
 
-    # check for parents not having mixed ploidy
-    length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent1 has mixed ploidy, which is unsupported")
-    length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
-
-    # Get the ploidy value & check for equal ploidy
-    p1_ploidy = length.(skipmissing(p1)) |> first
-    p2_ploidy = length.(skipmissing(p2)) |> first
-    p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
-
-    loci = unique(data.genodata.locus)
+    loci = data.locusinfo.locus
     
     # pre-allocate all output information
     out_loci_names = fill(loci, n) |> Base.Iterators.flatten |> collect
@@ -70,11 +74,12 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     out_offspring = fill.(["$generation" * "_offspring_$i" for i in 001:n], length(loci)) |> Base.Iterators.flatten |> collect
     out_population = fill(generation, n * length(loci))
     out_geno = similar(p1, n * length(loci))
-    out_loci = DataFrame(:name => out_offspring, :population => out_population, :locus => out_loci_names, :genotype => out_geno)
-    out_loci.name = PooledArray(out_loci.name)
-    out_loci.population = PooledArray(out_loci.population)
-    out_loci.locus = PooledArray(out_loci.locus)
-    
+    out_loci = DataFrame(
+        :name => PooledArray(out_offspring, compress = true), 
+        :population => PooledArray(out_population, compress = true), 
+        :locus => PooledArray(out_loci_names, compress = true), 
+        :genotype => out_geno
+        )
     # perform the cross
     if p1_ploidy == 1 
         haploid_cross!(data, parent1, parent2, n = n)
@@ -83,15 +88,17 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     else
         error("Currently supported ploidy: 1, 2, 4, 6, 8")
     end
+    #= dep
     out_meta = DataFrame(
         :name => unique(out_loci.name),
         :ploidy => fill(p1_ploidy, n),
         :population => fill(generation, n),
-        :latitude => Vector{Union{Missing, Float32}}(undef, n),
-        :longitude => Vector{Union{Missing, Float32}}(undef, n),
         :parents => fill((parent1,parent2), n)
     )
-    PopData(out_meta, out_loci)
+    =#
+    out = PopData(out_loci)
+    insertcols!(out.sampleinfo, :parents => fill((parent1,parent2), n))
+    return out
 end
 
 
@@ -117,7 +124,20 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     # check for presence of parents
     parent1 ∉ (@view parent_1_data.sampleinfo[!, :name]) && error("$parent1 not found in PopData")
     parent2 ∉ (@view parent_2_data.sampleinfo[!, :name]) && error("$parent2 not found in PopData")
-    
+
+    # Get the ploidy value & check for equal ploidy
+    p1_ploidy = data.sampleinfo.ploidy[data.sampleinfo.name .== parent1] |> first
+    p2_ploidy = data.sampleinfo.ploidy[data.sampleinfo.name .== parent2] |> first
+    p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
+
+    # check for parents not having mixed ploidy
+    if data.metadata.ploidy isa AbstractVector
+        p1_ploidy isa AbstractVector && error("Parent $parent1 has mixed ploidy, which is unsupported")
+        p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
+        #length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent1 has mixed ploidy, which is unsupported")
+        #length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
+    end
+    #=
     # get parental genotypes
     p1 = get_genotypes(parent_1_data, parent1)
     p2 = get_genotypes(parent_2_data, parent2)
@@ -130,7 +150,8 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     p1_ploidy = length.(skipmissing(p1)) |> first
     p2_ploidy = length.(skipmissing(p2)) |> first
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
-
+    =#
+    
     # verify identical loci
     loci = unique(parent_1_data.genodata.locus)
     loci_p2 = unique(parent_2_data.genodata.locus)
@@ -162,13 +183,15 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     else
         error("Currently supported ploidy: 1, 2, 4, 6, 8")
     end
+    #= Dep
     out_meta = DataFrame(
         :name => unique(out_loci.name),
         :ploidy => fill(p1_ploidy, n),
         :population => fill(generation, n),
-        :latitude => Vector{Union{Missing, Float32}}(undef, n),
-        :longitude => Vector{Union{Missing, Float32}}(undef, n),
         :parents => fill((parent1,parent2), n)
     )
     PopData(out_meta, out_loci)
+    =#
+    out = PopData(out_loci)
+    insertcols!(out.sampleinfo, :parents => fill((parent1,parent2), n))
 end
