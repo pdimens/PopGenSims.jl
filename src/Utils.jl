@@ -122,6 +122,6 @@ julia> simulate_sample(alleles, loc, ploidy = 2)
  [208, 208]
 ```
 """
-function simulate_sample(alleles::Dict{String,<:Tuple}, loc::Vector{String}; ploidy::Int)
+function simulate_sample(alleles::Dict{String,<:Tuple}, loc::Vector{String}; ploidy::Signed)
   map(i -> rand(alleles[i], ploidy) ,loc)
 end

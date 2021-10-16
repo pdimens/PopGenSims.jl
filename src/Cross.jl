@@ -19,7 +19,7 @@ function haploid_cross!(data::DataFrame, p1::T, p2::T; n::Int) where T <: GenoAr
     return data
 end
 
-function polyploid_cross!(data::DataFrame, p1::T, p2::T; n::Int, ploidy::Int) where T <: GenoArray
+function polyploid_cross!(data::DataFrame, p1::T, p2::T; n::Int, ploidy::Signed) where T <: GenoArray
     iter_df = DataFrames.groupby(data, :name)
     n_alleles = ploidy ÷ 2
     for simulation in iter_df

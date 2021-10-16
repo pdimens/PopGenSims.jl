@@ -8,12 +8,7 @@ allele-frequency pairs.
 
 **Example**
 ```julia
-d = Dict(
-  133 => 0.125,
-  135 => 0.5625,
-  143 => 0.25,
-  137 => 0.0625
-  )
+d = Dict(133 => 0.125,135 => 0.5625,143 => 0.25,137 => 0.0625)
 
 julia> sample_locus(d, 3, 2)
 5-element Array{Tuple{Int16,Int16},1}:
@@ -53,19 +48,19 @@ PopData{Diploid, 9 Microsatellite Loci}
 julia> sims.sampleinfo
 
   1700×5 DataFrame
-  Row │ name      population  ploidy  longitude  latitude 
-      │ String    String      Int8    Missing    Missing  
-──────┼───────────────────────────────────────────────────
-    1 │ sim_1     1                2   missing   missing  
-    2 │ sim_2     1                2   missing   missing  
-    3 │ sim_3     1                2   missing   missing  
-    4 │ sim_4     1                2   missing   missing  
-    5 │ sim_5     1                2   missing   missing  
-  ⋮   │    ⋮          ⋮         ⋮         ⋮         ⋮
- 1697 │ sim_1697  17               2   missing   missing  
- 1698 │ sim_1698  17               2   missing   missing  
- 1699 │ sim_1699  17               2   missing   missing  
- 1700 │ sim_1700  17               2   missing   missing  
+  Row │ name      population  ploidy   
+      │ String    String      Int8      
+──────┼───────────────────────────────
+    1 │ sim_1     1                2    
+    2 │ sim_2     1                2    
+    3 │ sim_3     1                2    
+    4 │ sim_4     1                2    
+    5 │ sim_5     1                2    
+  ⋮   │    ⋮          ⋮         ⋮ 
+ 1697 │ sim_1697  17               2  
+ 1698 │ sim_1698  17               2  
+ 1699 │ sim_1699  17               2  
+ 1700 │ sim_1700  17               2  
                                          1691 rows omitted
 
 julia> sims.genodata
@@ -116,9 +111,9 @@ function simulate(data::PopData; n::Int = 100)
     end
     transform!(
         geno_out,
-        :name => PooledArray => :name,
-        :population => PooledArray => :population,
-        :locus => PooledArray => :locus,
+        :name => (i -> PooledArray(i, compress = true) => :name,
+        :population => (i -> PooledArray(i, compress = true) => :population,
+        :locus => (i -> PooledArray(i, compress = true) => :locus,
         :genotype
     )
     #=

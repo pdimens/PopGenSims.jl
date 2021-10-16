@@ -30,7 +30,7 @@ function _cross(parent1::Vector{Vector{T}}, parent2::Vector{Vector{T}}) where T 
 end
 
 
-function _parentoffspring(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, padding::Int)
+function _parentoffspring(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, padding::Int)
     out_df = DataFrame(:locus => loc)
     for i in 1:n
         prefix = "sim" * lpad(i, padding, '0')
@@ -47,7 +47,7 @@ function _parentoffspring(alleles::Dict, loc::Vector{String}, n::Int, ploidy::In
 end
 
 
-function _fullsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, padding::Int)
+function _fullsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, padding::Int)
     out_df = DataFrame(:locus => loc)
     for i in 1:n
         prefix = "sim" * lpad(i, padding, '0')
@@ -64,7 +64,7 @@ end
 
 
 
-function _halfsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, padding::Int)
+function _halfsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, padding::Int)
     out_df = DataFrame(:locus => loc)
     for i in 1:n
         prefix = "sim" * lpad(i, padding, '0')
@@ -81,7 +81,7 @@ function _halfsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, paddi
 end
 
 
-function _unrelated(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, padding::Int)
+function _unrelated(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, padding::Int)
     out_df = DataFrame(:locus => loc)
     for i in 1:n
         prefix = "sim" * lpad(i, padding, '0')
@@ -98,7 +98,7 @@ function _unrelated(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Int, pad
 end
 
 """
-    simulate_sibship(data::PopData; fullsib::Int, halfsib::Int, unrelated::Int, parentoffspring::Int, ploidy::Int)
+    simulate_sibship(data::PopData; fullsib::Int, halfsib::Int, unrelated::Int, parentoffspring::Int, ploidy::Signed)
 Simulate mating crosses to generate sample pairs with any combination of the specified relationships, 
 returning a `PopData` object. The simulations will first generate parents of a given
 `ploidy` (inferred or specified) by drawing alleles from a global allele pool derived
@@ -159,7 +159,7 @@ julia> cat_sims.sampleinfo
                            108 rows omitted
 ```
 """
-function simulate_sibship(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unrelated::Int = 0, parentoffspring::Int = 0, ploidy::Int = 0)
+function simulate_sibship(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unrelated::Int = 0, parentoffspring::Int = 0, ploidy::Signed = 0)
     if iszero(sum([fullsib, halfsib, unrelated, parentoffspring]))
         throw(ArgumentError("Please specify at least one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parentoffspring\""))
     end
