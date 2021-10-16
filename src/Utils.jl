@@ -52,7 +52,7 @@ function Base.append!(data::PopData, data2::PopData)
   if pl1 != data2.metadata.ploidy
     data.metadata.ploidy = Int8[pl1, data2.metadata.ploidy]
   end
-  data.metadata.populations = length(unique(data.sampleinfo.populaton))
+  data.metadata.populations = length(unique(data.sampleinfo.population))
   return data
 end
 

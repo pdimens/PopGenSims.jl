@@ -126,19 +126,15 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     parent2 ∉ (@view parent_2_data.sampleinfo[!, :name]) && error("$parent2 not found in PopData")
 
     # Get the ploidy value & check for equal ploidy
-    p1_ploidy = parent_1_data.sampleinfo.ploidy[data.sampleinfo.name .== parent1] |> first
-    p2_ploidy = parent_2_data.data.sampleinfo.ploidy[data.sampleinfo.name .== parent2] |> first
+    p1_ploidy = parent_1_data.sampleinfo.ploidy[parent_1_data.sampleinfo.name .== parent1] |> first
+    p2_ploidy = parent_2_data.sampleinfo.ploidy[parent_2_data.sampleinfo.name .== parent2] |> first
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
 
     # check for parents not having mixed ploidy
-    if data.metadata.ploidy isa AbstractVector
-        p1_ploidy isa AbstractVector && error("Parent $parent1 has mixed ploidy, which is unsupported")
-        p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
-        #length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent1 has mixed ploidy, which is unsupported")
-        #length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
-    end
-    #=
-    # get parental genotypes
+    p1_ploidy isa AbstractVector && error("Parent $parent1 has mixed ploidy, which is unsupported")
+    p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
+    
+        # get parental genotypes
     p1 = get_genotypes(parent_1_data, parent1)
     p2 = get_genotypes(parent_2_data, parent2)
 
