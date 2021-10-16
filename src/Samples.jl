@@ -111,9 +111,9 @@ function simulate(data::PopData; n::Int = 100)
     end
     transform!(
         geno_out,
-        :name => (i -> PooledArray(i, compress = true) => :name,
-        :population => (i -> PooledArray(i, compress = true) => :population,
-        :locus => (i -> PooledArray(i, compress = true) => :locus,
+        :name => (i -> PooledArray(i, compress = true)) => :name,
+        :population => (i -> PooledArray(i, compress = true)) => :population,
+        :locus => (i -> PooledArray(i, compress = true)) => :locus,
         :genotype
     )
     #=
