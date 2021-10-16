@@ -8,7 +8,7 @@ function sample_genotype(geno::Missing, n_alleles::Int)
     return [missing]
 end
 
-function haploid_cross!(data::DataFrame, p1::T, p2::T; n::Int) where T <: GenoArray
+function haploid_cross!(data::DataFrame, p1::T, p2::T) where T <: GenoArray
     iter_df = DataFrames.groupby(data, :name)
     for simulation in iter_df
         all_alleles = getindex.(collect.(zip.(p1,p2)), 1)
@@ -19,7 +19,7 @@ function haploid_cross!(data::DataFrame, p1::T, p2::T; n::Int) where T <: GenoAr
     return data
 end
 
-function polyploid_cross!(data::DataFrame, p1::T, p2::T; n::Int, ploidy::Signed) where T <: GenoArray
+function polyploid_cross!(data::DataFrame, p1::T, p2::T; ploidy::Signed) where T <: GenoArray
     iter_df = DataFrames.groupby(data, :name)
     n_alleles = ploidy ÷ 2
     for simulation in iter_df
@@ -54,12 +54,8 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
 
     # check for parents not having mixed ploidy
-    if data.metadata.ploidy isa AbstractVector
-        p1_ploidy isa AbstractVector && error("Parent $parent1 has mixed ploidy, which is unsupported")
-        p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
-        #length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent1 has mixed ploidy, which is unsupported")
-        #length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
-    end
+    p1_ploidy isa AbstractVector && error("Parent $parent1 has mixed ploidy, which is unsupported")
+    p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
 
     # get parental genotypes
     p1 = get_genotypes(data, parent1)
@@ -68,10 +64,9 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     loci = data.locusinfo.locus
     
     # pre-allocate all output information
-    out_loci_names = fill(loci, n) |> Base.Iterators.flatten |> collect
-    #parents = Vector{Tuple{String, String}}(undef, n)
-
-    out_offspring = fill.(["$generation" * "_offspring_$i" for i in 001:n], length(loci)) |> Base.Iterators.flatten |> collect
+    out_loci_names = repeat(loci, outer = n)
+    _padding = length(string(n))
+    out_offspring = repeat(["$generation" * "_" * lpad("$i", _padding, "0") for i in 1:n], inner = length(loci))
     out_population = fill(generation, n * length(loci))
     out_geno = similar(p1, n * length(loci))
     out_loci = DataFrame(
@@ -82,22 +77,14 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
         )
     # perform the cross
     if p1_ploidy == 1 
-        haploid_cross!(data, parent1, parent2, n = n)
+        haploid_cross!(data, parent1, parent2)
     elseif p1_ploidy ∈  [2, 4, 6, 8] 
-        polyploid_cross!(out_loci, p1, p2, n = n, ploidy = p1_ploidy)
+        polyploid_cross!(out_loci, p1, p2, ploidy = p1_ploidy)
     else
         error("Currently supported ploidy: 1, 2, 4, 6, 8")
     end
-    #= dep
-    out_meta = DataFrame(
-        :name => unique(out_loci.name),
-        :ploidy => fill(p1_ploidy, n),
-        :population => fill(generation, n),
-        :parents => fill((parent1,parent2), n)
-    )
-    =#
     out = PopData(out_loci)
-    insertcols!(out.sampleinfo, :parents => fill((parent1,parent2), n))
+    insertcols!(out.sampleinfo, :parents => PooledArray(fill((parent1,parent2), n), compress = true))
     return out
 end
 
@@ -112,7 +99,7 @@ are positional arguments, therefore they must be written without keywords and in
 - `parent_1` : Pair of `PopData => "Parent1Name"`
 - `parent_2` : Pair of `PopData => "Parent1Name"`
 - `n` : Integer of number of offspring to generate (default: `100`)
-- `generation` : A string to assign `population` identity to the offspring (default: `"F1"`)
+- `generation` : A string to assign `population` identity and name prefix to the offspring (default: `"F1"`)
 """
 function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String = "F1")
     parent_1_data = parent_1.first
@@ -138,18 +125,14 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     p1 = get_genotypes(parent_1_data, parent1)
     p2 = get_genotypes(parent_2_data, parent2)
 
-    # check for parents not having mixed ploidy
-    length(unique(length.(skipmissing(p1)))) != 1 && error("Parent $parent1 has mixed ploidy, which is unsupported")
-    length(unique(length.(skipmissing(p2)))) != 1 && error("Parent $parent2 has mixed ploidy, which is unsupported")
-
     # Get the ploidy value & check for equal ploidy
     p1_ploidy = length.(skipmissing(p1)) |> first
     p2_ploidy = length.(skipmissing(p2)) |> first
     p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
     
     # verify identical loci
-    loci = unique(parent_1_data.genodata.locus)
-    loci_p2 = unique(parent_2_data.genodata.locus)
+    loci = parent_1_data.locusinfo.locus
+    loci_p2 = parent_2_data.locusinfo.locus
     length(loci) != length(loci_p2) && error("Both parents must have the same number of loci. $parent1 : $length(loci) | $parent2 : $length(loci_p2")
     loci_check = loci .!= loci_p2
     culprits_p1 = loci[loci_check]
@@ -158,10 +141,10 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     length(culprits_p1) > 0 && error("Both datasets must have loci in the same order. Loci causing this error:\n" * culp_print)
     
     # pre-allocate all output information
-    out_loci_names = fill(loci, n) |> Base.Iterators.flatten |> collect
+    out_loci_names = repeat(loci, outer = n)
     #parents = Vector{Tuple{String, String}}(undef, n)
-
-    out_offspring = fill.(["$generation" * "_offspring_$i" for i in 001:n], length(loci)) |> Base.Iterators.flatten |> collect
+    _padding = length(string(n))
+    out_offspring = repeat(["$generation" * "_" * lpad("$i", _padding, "0") for i in 1:n], inner = length(loci))
     out_population = fill(generation, n * length(loci))
     out_geno = similar(p1, n * length(loci))
     out_loci = DataFrame(:name => out_offspring, :population => out_population, :locus => out_loci_names, :genotype => out_geno)
@@ -172,21 +155,13 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
 
     # perform the cross
     if p1_ploidy == 1 
-        haploid_cross!(data, parent1, parent2, n = n)
+        haploid_cross!(data, parent1, parent2)
     elseif p1_ploidy ∈  [2, 4, 6, 8] 
-        polyploid_cross!(out_loci, p1, p2, n = n, ploidy = p1_ploidy)
+        polyploid_cross!(out_loci, p1, p2, ploidy = p1_ploidy)
     else
         error("Currently supported ploidy: 1, 2, 4, 6, 8")
     end
-    #= Dep
-    out_meta = DataFrame(
-        :name => unique(out_loci.name),
-        :ploidy => fill(p1_ploidy, n),
-        :population => fill(generation, n),
-        :parents => fill((parent1,parent2), n)
-    )
-    PopData(out_meta, out_loci)
-    =#
     out = PopData(out_loci)
     insertcols!(out.sampleinfo, :parents => fill((parent1,parent2), n))
+    return out
 end

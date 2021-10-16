@@ -7,7 +7,7 @@ using Test
 cats = @nancycats ;
 
 @testset "Crosses" begin
-    @testset "sample_genotypes" begin
+    @testset "sample genotypes" begin
         @test length(PopGenSims.sample_genotype(cats.genodata.genotype[30], 2)) == 2
         @test eltype(PopGenSims.sample_genotype(cats.genodata.genotype[30],1)) == eltype(cats.genodata.genotype[30])
         @test length(PopGenSims.sample_genotype(missing, 2)) == 1
