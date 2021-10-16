@@ -116,18 +116,5 @@ function simulate(data::PopData; n::Int = 100)
         :locus => (i -> PooledArray(i, compress = true)) => :locus,
         :genotype
     )
-    #=
-    # regenerate meta info
-    meta_df = DataFrames.combine(
-        groupby(geno_out, :name),
-        :name => first => :name,
-        :population => first => :population
-    )
-    meta_df[!, :ploidy] .= ploidy
-    meta_df[!, :longitude] .= missing
-    meta_df[!, :latitude] .= missing
-
-    PopData(meta_df, geno_out)
-    =#
     PopData(geno_out)
 end

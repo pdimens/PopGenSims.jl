@@ -23,11 +23,12 @@ cats = @nancycats ;
         @test f1 isa PopData
         @test f1.metadata.samples == 10
         @test length(f1.genodata.name) == 90
-        f2 = cross(cats => "N111", f1 => "firstgen_offspring_10", n = 10)
+        @test_throws cross(cats => "N111", f1 => "firstgen_offspring_10", n = 10)
+        f2 = cross(cats => "N111", f1 => "firstgen_10", n = 10)
         @test f2 isa PopData
         @test f2.metadata.samples == 10
         @test length(f2.genodata.name) == 90
-        f2 = cross(cats => "N111", f1 => "firstgen_offspring_10", n = 10, generation = "F2")
+        f2 = cross(cats => "N111", f1 => "firstgen_10", n = 10, generation = "F2")
         @test f2 isa PopData
         @test f2.metadata.samples == 10
         @test length(f2.genodata.name) == 90

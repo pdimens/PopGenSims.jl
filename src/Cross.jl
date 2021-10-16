@@ -81,7 +81,7 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     elseif p1_ploidy ∈  [2, 4, 6, 8] 
         polyploid_cross!(out_loci, p1, p2, ploidy = p1_ploidy)
     else
-        error("Currently supported ploidy: 1, 2, 4, 6, 8")
+        throw(MethodError("Currently supported ploidy: 1, 2, 4, 6, 8"))
     end
     out = PopData(out_loci)
     insertcols!(out.sampleinfo, :parents => PooledArray(fill((parent1,parent2), n), compress = true))
