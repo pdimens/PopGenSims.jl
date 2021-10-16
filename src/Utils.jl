@@ -28,24 +28,32 @@ PopData{Diploid, 9 Microsatellite Loci}
 ```
 """
 function Base.append!(data::PopData, data2::PopData)
-    if "parents" ∉ names(data.sampleinfo) && "parents" ∈ names(data2.sampleinfo)
-        len = data.metadata.samples
-        insertcols!(
-            data.sampleinfo, 
-            :parents => Vector{Union{Missing, Tuple{String,String}}}(undef, len)
-            )
-    elseif "parents" ∉ names(data2.sampleinfo) && "parents" ∈ names(data.sampleinfo)
-        len = length(data2.sampleinfo.name)
-        insertcols!(
-            data2.sampleinfo, 
-            :parents => Vector{Union{Missing, Tuple{String,String}}}(undef, len)
-            )
-    end
-    
-    append!(data.sampleinfo, data2.sampleinfo)
+  n1 = data.metadata.samples
+  pl1 = data.metadata.ploidy
+  if "parents" ∉ names(data.sampleinfo) && "parents" ∈ names(data2.sampleinfo)
+      len = data.metadata.samples
+      insertcols!(
+          data.sampleinfo, 
+          :parents => Vector{Union{Missing, Tuple{String,String}}}(undef, len)
+          )
+  elseif "parents" ∉ names(data2.sampleinfo) && "parents" ∈ names(data.sampleinfo)
+      len = length(data2.sampleinfo.name)
+      insertcols!(
+          data2.sampleinfo, 
+          :parents => Vector{Union{Missing, Tuple{String,String}}}(undef, len)
+          )
+  end
+  
+  append!(data.sampleinfo, data2.sampleinfo)
 
-    append!(data.genodata, data2.genodata)
-    return data
+  append!(data.genodata, data2.genodata)
+  # update metadata
+  data.metadata.samples = n1 + data2.metadata.samples
+  if pl1 != data2.metadata.ploidy
+    data.metadata.ploidy = Int8[pl1, data2.metadata.ploidy]
+  end
+  data.metadata.populations = length(unique(data.sampleinfo.populaton))
+  return data
 end
 
 
