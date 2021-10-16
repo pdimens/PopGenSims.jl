@@ -4,12 +4,13 @@ using DataFrames, PooledArrays, StaticArrays
 using StatsBase: sample, Weights
 import PopGenCore: read, write
 using PopGenCore:
+    allele_freq,
+    copy,
     Genotype,
     GenoArray,
     get_genotypes,
     PopData, 
-    sort,
-    allele_freq
+    sort
 
 include("Cross.jl")
 include("Samples.jl")

@@ -76,7 +76,7 @@ PopData{Diploid, 9 Microsatellite Loci}
 ```
 """
 function append(data::PopData, data2::PopData)
-  tmp  = PopGenCore.copy(data)
+  tmp  = copy(data)
   append!(tmp, data2)
   return tmp
 end

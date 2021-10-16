@@ -5,7 +5,7 @@ using PopGenSims
 using Test
 
 cats = @nancycats ;
-cats2 = deepcopy(cats)
+cats2 = copy(cats)
 
 @testset "append PopData" begin
     tmp = append(cats, cats2)
