@@ -107,7 +107,7 @@ function simulate(data::PopData; n::Int = 100)
     out_gdf = groupby(geno_out, :population)
     geno_gdf = groupby(freqs, :population)
     for pop in pops
-        out_gdf[(population = pop,)][!,:genotype] .= reduce(hcat, geno_gdf[(population = pop,)].frq) |> permutedims |> vec
+        out_gdf[(population = pop,)][!,:genotype] = reduce(hcat, geno_gdf[(population = pop,)].frq) |> permutedims |> vec
     end
     transform!(
         geno_out,
