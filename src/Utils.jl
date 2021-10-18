@@ -84,7 +84,13 @@ PopData{Diploid, 9 Microsatellite Loci}
 ```
 """
 function append(data::PopData, data2::PopData)
-  PopData(vcat(data, data2))
+  new_pdi = deepcopy(data.info)
+  append!(new_pdi.sampleinfo, data2.sampleinfo)
+  new_pdi.samples = data.info.samples + data2.info.samples
+  new_pdi.populations = length(unique(new_pdi.sampleinfo.population))
+  ploid = vcat(data.metadata.ploidy, data2.metadata.ploidy)
+  new_pdi.ploidy = length(unique(ploid)) == 1 ? ploid[1] : Int8[unique(ploidy)]
+  PopData(new_pdi, vcat(data,genodata, data2.genodata))
   #tmp  = copy(data)
   #append!(tmp, data2)
   #return tmp
@@ -99,11 +105,9 @@ function allele_pool(data::PopData)
   # index dataframe by locus
   idx_df = groupby(data.genodata, [:locus])
   # instantiate dict to store alleles
-  #allele_dict = Dict{String,Tuple}()
   # pull out loci names
   loc = getindex.(keys(idx_df), :locus)
   allele_dict = Dict(i => allele_pool(idx_df[(;locus = i)].genotype) for i in loc)
-  #[allele_dict[i] = allele_pool(idx_df[(;locus = i)].genotype) for i in loc]
   return string.(loc), allele_dict
 end
 
@@ -132,5 +136,5 @@ julia> simulate_sample(alleles, loc, ploidy = 2)
 ```
 """
 function simulate_sample(alleles::Dict{String,<:Tuple}, loc::Vector{String}; ploidy::Signed)
-  map(i -> rand(alleles[i], ploidy) ,loc)
+  map(i -> rand(alleles[i], ploidy), loc)
 end
