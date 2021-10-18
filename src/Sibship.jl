@@ -40,9 +40,6 @@ function _parentoffspring(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Si
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "parent_offspring")
-    #out_df.name = PooledArray(out_df.name, compress = true)
-    #out_df.population = PooledArray(out_df.population, compress = true)
-    #out_df.locus = PooledArray(out_df.locus, compress = true) 
     return out_df
 end
 
@@ -56,9 +53,6 @@ function _fullsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, pa
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "fullsib")
-    #out_df.name = PooledArray(out_df.name, compress = true)
-    #out_df.population = PooledArray(out_df.population, compress = true)
-    #out_df.locus = PooledArray(out_df.locus, compress = true)
     return out_df
 end
 
@@ -74,9 +68,6 @@ function _halfsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, pa
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "halfsib")
-    #out_df.name = PooledArray(out_df.name, compress = true)
-    #out_df.population = PooledArray(out_df.population, compress = true)
-    #out_df.locus = PooledArray(out_df.locus, compress = true)
     return out_df
 end
 
@@ -91,9 +82,6 @@ function _unrelated(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, 
     end
     out_df = rename!(select!(DataFrames.stack(out_df, Not(:locus)), 2, 1, 3), [:name, :locus, :genotype])
     insertcols!(out_df, 2, :population => "unrelated")
-    #out_df.name = PooledArrayout_df.name, compress = true)
-    #out_df.population = PooledArray(out_df.population, compress = true)
-    #out_df.locus = PooledArray(out_df.locus, compress = true)
     return out_df
 end
 

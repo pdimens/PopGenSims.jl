@@ -105,6 +105,17 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     parent_1_data = parent_1.first
     parent_2_data = parent_2.first
 
+    loci = parent_1_data.locusinfo.locus
+    loci_p2 = parent_2_data.locusinfo.locus
+    length(loci) != length(loci_p2) && error("Both datasets must have the same number of loci. $parent1 : $length(loci) | $parent2 : $length(loci_p2")
+    
+    # verify identical loci
+    loci_check = loci .!= loci_p2
+    culprits_p1 = loci[loci_check]
+    culprits_p2 = loci_p2[loci_check]
+    culp_print = "Parent 1\tParent 2" * "\n---------\t---------\n" * join("$i\t$j\n" for (i,j) in zip(culprits_p1, culprits_p2))
+    length(culprits_p1) > 0 && error("Both datasets must have loci in the same order. Loci causing this error:\n" * culp_print)
+
     parent1 = parent_1.second
     parent2 = parent_2.second
 
@@ -120,38 +131,21 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     # check for parents not having mixed ploidy
     p1_ploidy isa AbstractVector && error("Parent $parent1 has mixed ploidy, which is unsupported")
     p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
-    
-        # get parental genotypes
+
+    # get parental genotypes
     p1 = get_genotypes(parent_1_data, parent1)
     p2 = get_genotypes(parent_2_data, parent2)
 
-    # Get the ploidy value & check for equal ploidy
-    p1_ploidy = length.(skipmissing(p1)) |> first
-    p2_ploidy = length.(skipmissing(p2)) |> first
-    p1_ploidy != p2_ploidy && error("Parents must have identical ploidy. Parent1 = $p1_ploidy | Parent2 = $p2_ploidy")
-    
-    # verify identical loci
-    loci = parent_1_data.locusinfo.locus
-    loci_p2 = parent_2_data.locusinfo.locus
-    length(loci) != length(loci_p2) && error("Both parents must have the same number of loci. $parent1 : $length(loci) | $parent2 : $length(loci_p2")
-    loci_check = loci .!= loci_p2
-    culprits_p1 = loci[loci_check]
-    culprits_p2 = loci_p2[loci_check]
-    culp_print = "Parent 1\tParent 2" * "\n---------\t---------\n" * join("$i\t$j\n" for (i,j) in zip(culprits_p1, culprits_p2))
-    length(culprits_p1) > 0 && error("Both datasets must have loci in the same order. Loci causing this error:\n" * culp_print)
-    
     # pre-allocate all output information
     out_loci_names = repeat(loci, outer = n)
-    #parents = Vector{Tuple{String, String}}(undef, n)
     _padding = length(string(n))
     out_offspring = repeat(["$generation" * "_" * lpad("$i", _padding, "0") for i in 1:n], inner = length(loci))
     out_population = fill(generation, n * length(loci))
     out_geno = similar(p1, n * length(loci))
     out_loci = DataFrame(:name => out_offspring, :population => out_population, :locus => out_loci_names, :genotype => out_geno)
-    #categorical!(out_loci, [:name, :population, :locus], compress = true)
-    out_loci.name = PooledArray(out_loci.name)
-    out_loci.population = PooledArray(out_loci.population)
-    out_loci.locus = PooledArray(out_loci.locus)
+    out_loci.name = PooledArray(out_loci.name, compress = true)
+    out_loci.population = PooledArray(out_loci.population, compress = true)
+    out_loci.locus = PooledArray(out_loci.locus, compress = true)
 
     # perform the cross
     if p1_ploidy == 1 

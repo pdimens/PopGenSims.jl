@@ -89,9 +89,9 @@ function simulate(data::PopData; n::Int = 100)
     nloci = data.metadata.loci
 
     # instantiate output df
-    simnames = reduce(vcat, fill.(["sim_" * "$i" for i in 1:(n*npops)], nloci))
-    popnames = reduce(vcat, fill.(pops, (nloci * n)))
-    locinames = reduce(vcat, fill.(Ref(unique(data.genodata.locus)), (n * npops)))
+    simnames = repeat(["sim_" * "$i" for i in 1:(n*npops)], inner = nloci)
+    popnames = repeat(pops, inner = (nloci * n))
+    locinames = repeat(unique(data.genodata.locus), outer = (n * npops))
     geno_out = DataFrame(:name => simnames, :population => popnames, :locus => locinames, :genotype => similar(data.genodata.genotype, length(locinames)))
 
     # generate allele freqs per population

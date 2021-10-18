@@ -84,9 +84,10 @@ PopData{Diploid, 9 Microsatellite Loci}
 ```
 """
 function append(data::PopData, data2::PopData)
-  tmp  = copy(data)
-  append!(tmp, data2)
-  return tmp
+  PopData(vcat(data, data2))
+  #tmp  = copy(data)
+  #append!(tmp, data2)
+  #return tmp
 end
 
 
