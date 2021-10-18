@@ -84,6 +84,7 @@ PopData{Diploid, 9 Microsatellite Loci}
 ```
 """
 function append(data::PopData, data2::PopData)
+  #=
   new_pdi = deepcopy(data.info)
   append!(new_pdi.sampleinfo, data2.sampleinfo)
   new_pdi.samples = data.info.samples + data2.info.samples
@@ -91,9 +92,10 @@ function append(data::PopData, data2::PopData)
   ploid = vcat(data.metadata.ploidy, data2.metadata.ploidy)
   new_pdi.ploidy = length(unique(ploid)) == 1 ? ploid[1] : Int8[unique(ploidy)]
   PopData(new_pdi, vcat(data.genodata, data2.genodata))
-  #tmp  = copy(data)
-  #append!(tmp, data2)
-  #return tmp
+  =#
+  tmp  = copy(data)
+  append!(tmp, data2)
+  return tmp
 end
 
 
@@ -138,3 +140,5 @@ julia> simulate_sample(alleles, loc, ploidy = 2)
 function simulate_sample(alleles::Dict{String,<:Tuple}, loc::Vector{String}; ploidy::Signed)
   map(i -> rand(alleles[i], ploidy), loc)
 end
+
+feature_req() = "\nPlease open an Issue or Pull Request on https://www.github.com/pdimens/PopGenSims.jl if you would like this feature implemented"
