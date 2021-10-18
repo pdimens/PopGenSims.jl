@@ -90,7 +90,7 @@ function append(data::PopData, data2::PopData)
   new_pdi.populations = length(unique(new_pdi.sampleinfo.population))
   ploid = vcat(data.metadata.ploidy, data2.metadata.ploidy)
   new_pdi.ploidy = length(unique(ploid)) == 1 ? ploid[1] : Int8[unique(ploidy)]
-  PopData(new_pdi, vcat(data,genodata, data2.genodata))
+  PopData(new_pdi, vcat(data.genodata, data2.genodata))
   #tmp  = copy(data)
   #append!(tmp, data2)
   #return tmp
