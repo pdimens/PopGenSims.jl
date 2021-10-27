@@ -26,11 +26,11 @@ using DataFrames, PooledArrays, StaticArrays
 using StatsBase: sample, Weights
 import PopGenCore: read, write
 using PopGenCore:
-    allele_freq,
+    allelefreq,
     copy,
     Genotype,
     GenoArray,
-    get_genotypes,
+    genotypes,
     PopData, 
     sort
 

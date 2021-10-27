@@ -98,7 +98,7 @@ function simulate(data::PopData; n::Int = 100)
     gdf = groupby(data.genodata, [:population, :locus])
     freqs = DataFrames.combine(
         gdf,
-        :genotype => allele_freq => :frq
+        :genotype => allelefreq => :frq
     )
     # create new genotypes
     transform!(freqs, :frq => (i -> sample_locus.(i,n,ploidy)) => :frq)

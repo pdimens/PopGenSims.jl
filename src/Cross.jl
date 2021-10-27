@@ -58,8 +58,8 @@ function cross(data::PopData, parent1::String, parent2::String; n::Int = 100, ge
     p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
 
     # get parental genotypes
-    p1 = get_genotypes(data, parent1)
-    p2 = get_genotypes(data, parent2)
+    p1 = genotypes(data, parent1)
+    p2 = genotypes(data, parent2)
 
     loci = data.locusinfo.locus
     
@@ -133,8 +133,8 @@ function cross(parent_1::Pair, parent_2::Pair; n::Int = 100, generation::String 
     p2_ploidy isa AbstractVector && error("Parent $parent2 has mixed ploidy, which is unsupported")
 
     # get parental genotypes
-    p1 = get_genotypes(parent_1_data, parent1)
-    p2 = get_genotypes(parent_2_data, parent2)
+    p1 = genotypes(parent_1_data, parent1)
+    p2 = genotypes(parent_2_data, parent2)
 
     # pre-allocate all output information
     out_loci_names = repeat(loci, outer = n)
