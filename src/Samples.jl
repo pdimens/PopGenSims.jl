@@ -1,5 +1,3 @@
-export simulate
-
 """
     sample_locus(locus::Dict, n::Int, ploidy::Signed)
 Internal function used by `simulate` to take a `Dict` of alleles => frequencies of a locus and return
@@ -55,16 +53,56 @@ julia> sims_prop = simulate(cats, scale = 3)
     Populations: 17
 ```
 """
-function simulate(data::PopData; n::Int=0, scale::Int = 0)
-    n == scale == 0 && throw(ArgumentError("Please use one of n (flat) or scale (proportional) keywords for simulations. See ?simulate for more info."))
-    !iszero(n) & !iszero(scale) && throw(ArgumentError("Must use only one of n (flat) or scale (proportional) keywords for simulations. See ?simulate for more info."))
-    !iszero(n) & iszero(scale) && return _simulateflat(data, n)
-    iszero(n) & !iszero(scale) && return _simulatescale(data, scale)
+function simulate(data::PopData; n::Union{Dict{String,Int}, Int}=0, scale::Int = 0)
+    n == scale && throw(ArgumentError("Please use one of n (flat) or scale (proportional) keywords for simulations. See ?simulate for more info."))
+    ((n isa Dict) | (n != 0)) & !iszero(scale) && throw(ArgumentError("Must use only one of n (flat) or scale (proportional) keywords for simulations. See ?simulate for more info."))
+    length(data.metadata.ploidy) > 1 && error("Simulations do not work on mixed-ploidy data (yet)")
+    geno_out =
+        if n != 0
+            n isa Int ? _simulateflat(data, n) : _simulatearbitrary(data, n)
+        else
+            _simulatescale(data, scale)
+        end
+    transform!(
+        geno_out,
+        :name => (i -> PooledArray(i, compress = true)) => :name,
+        :population => (i -> PooledArray(i, compress = true)) => :population,
+        :locus => (i -> PooledArray(i, compress = true)) => :locus,
+        :genotype
+    )
+    PopData(geno_out)
+end
+
+function _simulatearbitrary(data::PopData, n::Dict{String, Int})
+    ploidy = data.metadata.ploidy
+    pops = collect(keys(n))
+    popcounts =  collect(values(n))
+    nloci = data.metadata.loci
+    nsamples = sum(popcounts)
+    # instantiate output df
+    simnames = repeat(["sim_" * "$i" for i in 1:nsamples], inner = nloci)
+    popnames = reduce(vcat, [fill(i, nloci * j) for (i,j) in zip(pops,popcounts)])
+    locinames = repeat(unique(data.genodata.locus), outer = nsamples)
+    geno_out = DataFrame(:name => simnames, :population => popnames, :locus => locinames, :genotype => similar(data.genodata.genotype, length(locinames)))
+    # generate allele freqs per population
+    gdf = groupby(data.genodata[data.genodata.population .∈ Ref(pops),:], [:population, :locus])
+    freqs = DataFrames.combine(
+        gdf,
+        :genotype => allelefreq => :frq,
+    )
+    freqs[:, :n] .= getindex.(Ref(n), freqs.population)
+    transform!(freqs, [:frq, :n] => ((i,j) -> sample_locus.(i, j, ploidy)) => :frq)
+    # populate out df
+    out_gdf = groupby(geno_out, :population)
+    geno_gdf = groupby(freqs, :population)
+    for pop in pops
+        out_gdf[(population = pop,)][:,:genotype] = reduce(hcat, geno_gdf[(population = pop,)].frq) |> permutedims |> vec
+    end
+    return geno_out
 end
 
 function _simulateflat(data::PopData, n::Int)
     ploidy = data.metadata.ploidy
-    length(ploidy) > 1 && error("Simulations do not work on mixed-ploidy data (yet)")
     pops = unique(data.sampleinfo.population)
     npops = data.metadata.populations
     nloci = data.metadata.loci
@@ -90,19 +128,11 @@ function _simulateflat(data::PopData, n::Int)
     for pop in pops
         out_gdf[(population = pop,)][:,:genotype] = reduce(hcat, geno_gdf[(population = pop,)].frq) |> permutedims |> vec
     end
-    transform!(
-        geno_out,
-        :name => (i -> PooledArray(i, compress = true)) => :name,
-        :population => (i -> PooledArray(i, compress = true)) => :population,
-        :locus => (i -> PooledArray(i, compress = true)) => :locus,
-        :genotype
-    )
-    PopData(geno_out)
+    return geno_out
 end
 
 function _simulatescale(data::PopData, n::Int)
     ploidy = data.metadata.ploidy
-    length(ploidy) > 1 && error("Simulations do not work on mixed-ploidy data (yet)")
     pops = unique(data.sampleinfo.population)
     popcounts =  [count(i -> i == j, data.sampleinfo.population) for j in pops]
     nloci = data.metadata.loci
@@ -126,12 +156,5 @@ function _simulatescale(data::PopData, n::Int)
     for pop in pops
         out_gdf[(population = pop,)][:,:genotype] = reduce(hcat, geno_gdf[(population = pop,)].frq) |> permutedims |> vec
     end
-    transform!(
-        geno_out,
-        :name => (i -> PooledArray(i, compress = true)) => :name,
-        :population => (i -> PooledArray(i, compress = true)) => :population,
-        :locus => (i -> PooledArray(i, compress = true)) => :locus,
-        :genotype
-    )
-    PopData(geno_out)
+    return geno_out
 end
