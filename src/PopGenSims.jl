@@ -18,7 +18,7 @@ Documentation: https://biojulia.net/PopGen.jl/
 - `cross(popdata => parent1, popdata => parent2, ...) to cross two parents from different PopData (e.g. backcross) 
 
 ## Simulate siblingship
-- `simulate_sibship(popdata, fullsib = , halfsib = , unrelated = , ...)` to simulate breeding events generating pairs of individuals of known kinship.
+- `simulatekin(popdata, fullsib = , halfsib = , unrelated = , ...)` to simulate breeding events generating pairs of individuals of known kinship.
 """
 module PopGenSims
 
