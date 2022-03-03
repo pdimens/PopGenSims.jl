@@ -1,9 +1,7 @@
-export simulate_sibship
-
 """
     _cross(parent1::Vector{Vector{T}}, parent2::Vector{Vector{T}}) where T <: Signed
 Simulate a mating cross between two parents, generating one offspring with the same
-ploidy as `parent1`. This variant of `cross` is used internally for `simulate_sibship`.
+ploidy as `parent1`. This variant of `cross` is used internally for `simulatekin`.
 """
 function _cross(parent1::Vector{Vector{T}}, parent2::Vector{Vector{T}}) where T <: Signed
     ploidy = length(first(parent1))
@@ -57,7 +55,6 @@ function _fullsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, pa
 end
 
 
-
 function _halfsib(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, padding::Int)
     out_df = DataFrame(:locus => loc)
     for i in 1:n
@@ -86,7 +83,7 @@ function _unrelated(alleles::Dict, loc::Vector{String}, n::Int, ploidy::Signed, 
 end
 
 """
-    simulate_sibship(data::PopData; fullsib::Int, halfsib::Int, unrelated::Int, parentoffspring::Int, ploidy::Signed)
+    simulatekin(data::PopData; fullsib::Int, halfsib::Int, unrelated::Int, parentoffspring::Int, ploidy::Signed)
 Simulate mating crosses to generate sample pairs with any combination of the specified relationships, 
 returning a `PopData` object. The simulations will first generate parents of a given
 `ploidy` (inferred or specified) by drawing alleles from a global allele pool derived
@@ -121,7 +118,7 @@ there's a 50% chance parent_1 will give 2 alleles for every locus for that simul
 ```
 julia> cats = @nanycats ;
 
-julia> cat_sims = simulate_sibship(cats, fullsib = 10, halfsib = 50)
+julia> cat_sims = simulatekin(cats, fullsib = 10, halfsib = 50)
 PopData{Diploid, 9 Microsatellite loci}
   Samples: 120
   Populations: 2
@@ -147,7 +144,7 @@ julia> cat_sims.sampleinfo
                            108 rows omitted
 ```
 """
-function simulate_sibship(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unrelated::Int = 0, parentoffspring::Int = 0, ploidy::Signed = 0)
+function simulatekin(data::PopData; fullsib::Int = 0, halfsib::Int = 0, unrelated::Int = 0, parentoffspring::Int = 0, ploidy::Signed = 0)
     if iszero(sum([fullsib, halfsib, unrelated, parentoffspring]))
         throw(ArgumentError("Please specify at least one of: \n- \"fullsib\" \n- \"halfsib\" \n- \"unrelated\"\n- \"parentoffspring\""))
     end
