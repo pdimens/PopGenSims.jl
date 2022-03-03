@@ -1,5 +1,3 @@
-export append, append!
-
 """
     append!(data::PopData, data2::PopData)
 Add the rows of `data2` to the end of `data`. This will add the samples present

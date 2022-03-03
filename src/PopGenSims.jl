@@ -35,8 +35,15 @@ using PopGenCore:
     sort
 
 include("Cross.jl")
+export cross, backcross
+
 include("Samples.jl")
+export simulate
+
 include("Sibship.jl")
+export simulatekin
+
 include("Utils.jl")
+export append, append!
 
 end
