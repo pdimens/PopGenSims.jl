@@ -1,6 +1,5 @@
 ![logo](misc/PopGenSims.png)
 [![alt text](https://img.shields.io/badge/docs-stable-informational?style=for-the-badge&logo=Read%20The%20Docs&logoColor=white)](https://biojulia.net/PopGen.jl/docs/simulations)
-[![alt text](https://img.shields.io/badge/slack-join%20PopGen.jl-9d72b1?style=for-the-badge&logo=slack)](https://join.slack.com/t/popgenjl/shared_invite/zt-deam65n8-DuBs2z1oDtsbBuRplJW~Pg)
 [![Cite](https://img.shields.io/badge/Cite-10.5281/zenodo.6077864-e1e1e1?style=for-the-badge)](https://zenodo.org/badge/latestdoi/278944885) 
 ![build_status](https://img.shields.io/github/actions/workflow/status/pdimens/PopGenSims.jl/pkgtests.yml?branch=dev&label=Dev%20Build&logo=GitHub&style=for-the-badge)
 
